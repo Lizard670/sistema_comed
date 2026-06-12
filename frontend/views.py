@@ -11,3 +11,6 @@ def pagina_registrar(request):
 
 def pagina_resetar_senha(request):
     return render(request, "resetar_senha.html")
+
+def pagina_estudantes(request):
+    return render(request, "estudantes.html")
