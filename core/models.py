@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.timezone import now
-from localflavor.br.models import BRCPFField
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,9 +21,7 @@ class BaseModel(models.Model):
         
 class Usuario(BaseModel):
     matricula = models.CharField(help_text="Matrícula do usuário", max_length=20, unique=True, db_index=True, blank=False, null=False)
-    nome = models.CharField(help_text="Nome do usuário", max_length=70, blank=False, null=False)
     nascimento = models.DateField(help_text="Data de nascimento do usuário", blank=False, null=True)
-    cpf = BRCPFField(help_text="CPF do usuário", max_length=14, unique=True, db_index=True, blank=True, null=True)
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -36,7 +33,6 @@ class Usuario(BaseModel):
         
     def __str__(self):
         return f"{self.nome} - {self.matricula}"
-
     
 class Curso(BaseModel):
     nome = models.CharField(help_text="Nome do curso", max_length=30, blank=False, null=False)
@@ -72,9 +68,10 @@ class Aluno(BaseModel):
     responsavel = models.CharField(help_text="Nome do responsável pelo aluno", max_length=100, blank=False, null=False)
     peso = models.DecimalField(help_text="Peso do aluno", max_digits=5, decimal_places=2, null=True, blank=True)
     altura = models.DecimalField(help_text="Altura do aluno", max_digits=4, decimal_places=2, null=True, blank=True)
-    medicamentos_continuos = models.TextField(help_text="Medicamentos contínuos consumidos pelo aluno", blank=True, null=True)
-    restricoes_medicas = models.TextField(help_text="Restrições/Impedimentos médicos do aluno", blank=True, null=True)
-
+    medicamentos = models.TextField(help_text="Medicamentos contínuos consumidos pelo aluno", blank=True, null=True)
+    restricoes = models.TextField(help_text="Restrições/Impedimentos médicos do aluno", blank=True, null=True)
+    observacoes = models.TextField(help_text="Observações internas sobre o aluno", blank=True, null=True)
+    
     TIPOS_SANGUINEOS = [
     ("A+", "A+"),
     ("A-", "A-"),
@@ -99,7 +96,8 @@ class Aluno(BaseModel):
         return f"{self.nome} - ({self.matricula})"
 
 class Prontuario(BaseModel):
-    data_horario = models.DateTimeField(help_text="Data e horário do prontuário", blank=False, null=False)
+    horario_inicio = models.DateTimeField(help_text="Horário de ínicio do prontuário", blank=False, null=False)
+    horario_fim = models.DateTimeField(help_text="Horário de fim do prontuário", blank=False, null=False)
     descricao = models.TextField(help_text="Descrição do prontuário", blank=False, null=False)
     observacoes = models.TextField(help_text="Observações do prontuário", blank=True, null=True)
     encaminhamento = models.TextField(help_text="Encaminhamento do prontuário", blank=True, null=True)
