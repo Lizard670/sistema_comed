@@ -2,7 +2,7 @@ from django.urls import path, include
 from django.contrib.auth.models import Group, User
 from rest_framework import routers, serializers, viewsets
 from rest_framework.generics import RetrieveAPIView
-from core.models import Usuario, Curso, Turma, Aluno, Prontuario, Declaracao
+from core.models import Usuario, Curso, Turma, Aluno, Prontuario, Atestado
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,7 +18,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data["user"])
 
         try:
-            usuario = Usuario.objects.create(user=user, matricula=validated_data["matricula"], nascimento=validated_data["nascimento"])
+            usuario = Usuario.objects.create(user=user, nome=validated_data["nome"], matricula=validated_data["matricula"])
         except Exception as e:
             user.delete()
             raise e
@@ -71,11 +71,11 @@ class ProntuarioDetailView(RetrieveAPIView):
     queryset = Prontuario.objects.all()
     serializer_class = ProntuarioSerializer
 
-class DeclaracaoSerializer(serializers.ModelSerializer):
+class AtestadoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Declaracao
+        model = Atestado
         fields = "__all__"
 
 class AtestadoDetailView(RetrieveAPIView):
-    queryset = Declaracao.objects.all()
-    serializer_class = DeclaracaoSerializer
+    queryset = Atestado.objects.all()
+    serializer_class = AtestadoSerializer
