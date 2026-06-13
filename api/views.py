@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from core.models import (
     Usuario,
@@ -45,6 +48,16 @@ class AlunoViewSet(viewsets.ModelViewSet):
 
         return AlunoDetailSerializer
 
+    # Rota: api/aluno/{id}/prontuarios/
+    @action(detail=True, methods=["get"], url_path="prontuarios")
+    def prontuarios(self, request, pk=None):
+        aluno = self.get_object()
+
+        prontuarios = Prontuario.objects.filter(aluno=aluno)
+        serializer = ProntuarioSerializer(prontuarios, many=True)
+
+        return Response(serializer.data)
+    
 
 class ProntuarioViewSet(viewsets.ModelViewSet):
     queryset = Prontuario.objects.all()
