@@ -7,13 +7,7 @@ from .views import (
     TurmaViewSet,
     AlunoViewSet,
     ProntuarioViewSet,
-    AtestadoViewSet,
-    UsuarioDetailView,
-    CursoDetailView,
-    TurmaDetailView,
-    AlunoDetailView,
-    ProntuarioDetailView,
-    AtestadoDetailView
+    AtestadoViewSet
 )
 
 router = DefaultRouter()
@@ -23,14 +17,8 @@ router.register(r'cursos', CursoViewSet)
 router.register(r'turmas', TurmaViewSet)
 router.register(r'alunos', AlunoViewSet)
 router.register(r'prontuarios', ProntuarioViewSet)
-router.register(r'declaracoes', AtestadoViewSet)
+router.register(r'atestados', AtestadoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('usuario/<int:pk>/', UsuarioDetailView.as_view(), name='usuario'),
-    path('curso/<int:pk>/', CursoDetailView.as_view(), name='curso'),
-    path('turma/<int:pk>/', TurmaDetailView.as_view(), name='turma'),
-    path('aluno/<int:pk>/', AlunoDetailView.as_view(), name='aluno'),
-    path('prontuario/<int:pk>/', ProntuarioDetailView.as_view(), name='prontuario'),
-    path('declaracao/<int:pk>/', AtestadoDetailView.as_view(), name='declaracao')
 ]
