@@ -15,7 +15,17 @@ def pagina_resetar_senha(request):
     return render(request, "resetar_senha.html")
 
 def pagina_estudantes(request):
-    return render(request, "estudantes.html")
+    if request.method == "POST":
+        print(request)
+        form = forms.Estudante(request.POST)
+        if form.is_valid():
+            # TODO: Criar um novo prontuário no banco de dados usando as informações do forms
+            pass
+
+    else:
+        form = forms.Estudante()
+
+    return render(request, "estudantes.html", {"form": form})
 
 def pagina_prontuario(request):
     if request.method == "POST":

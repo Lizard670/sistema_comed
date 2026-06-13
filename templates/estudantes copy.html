@@ -1,5 +1,5 @@
 {% load static %}
-{% load crispy_forms_tags %}
+
 <!DOCTYPE html>
 <html lang="pt-BR">
     <head>
@@ -298,10 +298,7 @@
                                 
                             </div>
                         </div>
-                        <form action="/prontuario/" method="post">
-                            {% csrf_token %}
-                            {% crispy form form.helper %}
-                        </form>
+
                     </div>
                 </main>
 
