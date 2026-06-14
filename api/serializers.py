@@ -8,7 +8,23 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields =  "__all__"
 
-class UsuarioSerializer(serializers.ModelSerializer):
+class UsuarioListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields =  ["id", "user"]
+    
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data["user"])
+
+        try:
+            usuario = Usuario.objects.create(user=user)
+        except Exception as e:
+            user.delete()
+            raise e
+        else:
+            return usuario
+        
+class UsuarioDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields =  "__all__"
@@ -24,28 +40,42 @@ class UsuarioSerializer(serializers.ModelSerializer):
         else:
             return usuario
 
-class CursoSerializer(serializers.ModelSerializer):
+class CursoListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Curso
+        fields =  ["id", "nome"]
+
+class CursoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curso
         fields =  "__all__"
 
-class TurmaSerializer(serializers.ModelSerializer):
+class TurmaListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Turma
+        fields =  ["id", "nome", "curso"]
+
+class TurmaDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turma
         fields =  "__all__"
 
-# Em caso de não precisar de todas a informações de uma vez 
 class AlunoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aluno
-        fields = ["id", "matricula", "nome", "turma"]
+        fields = ["id", "matricula", "nome", "nome_responsavel", "turma"]
 
 class AlunoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aluno
         fields =  "__all__"
 
-class ProntuarioSerializer(serializers.ModelSerializer):
+class ProntuarioListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prontuario
+        fields = ["id", "aluno", "usuario", "data", "tipo_atendimento", "status"]
+
+class ProntuarioDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prontuario
         fields =  "__all__"
