@@ -15,44 +15,62 @@ from core.models import (
 )
 
 from .serializers import (
-    UsuarioSerializer,
-    CursoSerializer,
-    TurmaSerializer,
+    UsuarioListSerializer,
+    UsuarioDetailSerializer,
+    CursoListSerializer,
+    CursoDetailSerializer,
+    TurmaListSerializer,
+    TurmaDetailSerializer,
     AlunoListSerializer,
     AlunoDetailSerializer,
-    ProntuarioSerializer,
+    ProntuarioListSerializer,
+    ProntuarioDetailSerializer,
     DeclaracaoSerializer
 )
 
-
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return UsuarioListSerializer
+
+        return UsuarioDetailSerializer
 
 
 class UsuarioDetailView(RetrieveAPIView):
     queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer
+    serializer_class = UsuarioDetailSerializer
 
 
 class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()
-    serializer_class = CursoSerializer
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return CursoListSerializer
+
+        return CursoDetailSerializer
+    
 
 class CursoDetailView(RetrieveAPIView):
     queryset = Curso.objects.all()
-    serializer_class = CursoSerializer
+    serializer_class = CursoDetailSerializer
 
 
 class TurmaViewSet(viewsets.ModelViewSet):
     queryset = Turma.objects.all()
-    serializer_class = TurmaSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return TurmaListSerializer
+
+        return TurmaDetailSerializer
 
 
 class TurmaDetailView(RetrieveAPIView):
     queryset = Turma.objects.all()
-    serializer_class = TurmaSerializer
+    serializer_class = TurmaDetailSerializer
 
 
 class AlunoViewSet(viewsets.ModelViewSet):
@@ -64,6 +82,7 @@ class AlunoViewSet(viewsets.ModelViewSet):
 
         return AlunoDetailSerializer
     
+
 class AlunoDetailView(RetrieveAPIView):
     queryset = Aluno.objects.all()
     serializer_class = AlunoDetailSerializer
@@ -74,18 +93,24 @@ class AlunoDetailView(RetrieveAPIView):
         aluno = self.get_object()
 
         prontuarios = Prontuario.objects.filter(aluno=aluno)
-        serializer = ProntuarioSerializer(prontuarios, many=True)
+        serializer = ProntuarioListSerializer(prontuarios, many=True)
 
         return Response(serializer.data)
-    
+
+
 class ProntuarioViewSet(viewsets.ModelViewSet):
     queryset = Prontuario.objects.all()
-    serializer_class = ProntuarioSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ProntuarioListSerializer
+
+        return ProntuarioDetailSerializer
 
 
 class ProntuarioDetailView(RetrieveAPIView):
     queryset = Prontuario.objects.all()
-    serializer_class = ProntuarioSerializer
+    serializer_class = ProntuarioDetailSerializer
 
 
 class DeclaracaoViewSet(viewsets.ModelViewSet):
