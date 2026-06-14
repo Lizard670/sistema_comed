@@ -3,9 +3,13 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     UsuarioViewSet,
+    UsuarioDetailView,
     CursoViewSet,
+    CursoDetailView,
     TurmaViewSet,
+    TurmaDetailView,
     AlunoViewSet,
+    AlunoDetailView,
     ProntuarioViewSet,
     DeclaracaoViewSet,
     UsuarioDetailView,
@@ -23,7 +27,6 @@ router.register(r'cursos', CursoViewSet)
 router.register(r'turmas', TurmaViewSet)
 router.register(r'alunos', AlunoViewSet)
 router.register(r'prontuarios', ProntuarioViewSet)
-router.register(r'declaracoes', DeclaracaoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
