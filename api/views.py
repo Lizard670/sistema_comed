@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -29,12 +30,27 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
 
 
+class UsuarioDetailView(RetrieveAPIView):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+
+
 class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
 
 
+class CursoDetailView(RetrieveAPIView):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+
+
 class TurmaViewSet(viewsets.ModelViewSet):
+    queryset = Turma.objects.all()
+    serializer_class = TurmaSerializer
+
+
+class TurmaDetailView(RetrieveAPIView):
     queryset = Turma.objects.all()
     serializer_class = TurmaSerializer
 
@@ -47,6 +63,10 @@ class AlunoViewSet(viewsets.ModelViewSet):
             return AlunoListSerializer
 
         return AlunoDetailSerializer
+    
+class AlunoDetailView(RetrieveAPIView):
+    queryset = Aluno.objects.all()
+    serializer_class = AlunoDetailSerializer
 
     # Rota: api/aluno/{id}/prontuarios/
     @action(detail=True, methods=["get"], url_path="prontuarios")
@@ -58,12 +78,21 @@ class AlunoViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
     
-
 class ProntuarioViewSet(viewsets.ModelViewSet):
     queryset = Prontuario.objects.all()
     serializer_class = ProntuarioSerializer
 
 
+class ProntuarioDetailView(RetrieveAPIView):
+    queryset = Prontuario.objects.all()
+    serializer_class = ProntuarioSerializer
+
+
 class DeclaracaoViewSet(viewsets.ModelViewSet):
+    queryset = Declaracao.objects.all()
+    serializer_class = DeclaracaoSerializer
+
+
+class DeclaracaoDetailView(RetrieveAPIView):
     queryset = Declaracao.objects.all()
     serializer_class = DeclaracaoSerializer
