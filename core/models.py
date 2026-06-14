@@ -96,8 +96,9 @@ class Aluno(BaseModel):
         return f"{self.nome} - ({self.matricula})"
 
 class Prontuario(BaseModel):
-    horario_inicio = models.DateTimeField(help_text="Horário de ínicio do prontuário", blank=False, null=False)
-    horario_fim = models.DateTimeField(help_text="Horário de fim do prontuário", blank=False, null=False)
+    data = models.DateField(help_text="Data do prontuário", blank=False, null=False)
+    horario_inicio = models.TimeField(help_text="Horário de ínicio do prontuário", blank=False, null=False)
+    horario_fim = models.TimeField(help_text="Horário de fim do prontuário", blank=False, null=False)
     descricao = models.TextField(help_text="Descrição do prontuário", blank=False, null=False)
     observacoes = models.TextField(help_text="Observações do prontuário", blank=True, null=True)
     encaminhamento = models.TextField(help_text="Encaminhamento do prontuário", blank=True, null=True)
