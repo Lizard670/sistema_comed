@@ -32,7 +32,7 @@ class Usuario(BaseModel):
         ordering = ["matricula"]
         
     def __str__(self):
-        return self.matricula
+        return f"{self.user.first_name} - {self.matricula}"
     
 class Curso(BaseModel):
     nome = models.CharField(help_text="Nome do curso", max_length=30, blank=False, null=False)
@@ -65,7 +65,7 @@ class Aluno(BaseModel):
     
     nome = models.CharField(help_text="Nome do aluno", max_length=70, blank=False, null=False)
     nascimento = models.DateField(help_text="Data de nascimento do aluno", blank=False, null=False)
-    responsavel = models.CharField(help_text="Nome do responsável pelo aluno", max_length=100, blank=False, null=False)
+    nome_responsavel = models.CharField(help_text="Nome do responsável pelo aluno", max_length=100, blank=False, null=False)
     peso = models.DecimalField(help_text="Peso do aluno", max_digits=5, decimal_places=2, null=True, blank=True)
     altura = models.DecimalField(help_text="Altura do aluno", max_digits=4, decimal_places=2, null=True, blank=True)
     medicamentos = models.TextField(help_text="Medicamentos contínuos consumidos pelo aluno", blank=True, null=True)
@@ -101,7 +101,6 @@ class Prontuario(BaseModel):
     horario_fim = models.TimeField(help_text="Horário de fim do prontuário", blank=False, null=False)
     descricao = models.TextField(help_text="Descrição do prontuário", blank=False, null=False)
     observacoes = models.TextField(help_text="Observações do prontuário", blank=True, null=True)
-    encaminhamento = models.TextField(help_text="Encaminhamento do prontuário", blank=True, null=True)
     
     TIPOS_ATENDIMENTO = [
     ("consulta", "Consulta"),
