@@ -10,7 +10,7 @@ from core.models import (
     Turma,
     Aluno,
     Prontuario,
-    Atestado
+    Declaracao
 )
 
 from .serializers import (
@@ -20,7 +20,7 @@ from .serializers import (
     AlunoListSerializer,
     AlunoDetailSerializer,
     ProntuarioSerializer,
-    AtestadoSerializer
+    DeclaracaoSerializer
 )
 
 
@@ -64,6 +64,6 @@ class ProntuarioViewSet(viewsets.ModelViewSet):
     serializer_class = ProntuarioSerializer
 
 
-class AtestadoViewSet(viewsets.ModelViewSet):
-    queryset = Atestado.objects.all()
-    serializer_class = AtestadoSerializer
+class DeclaracaoViewSet(viewsets.ModelViewSet):
+    queryset = Declaracao.objects.all()
+    serializer_class = DeclaracaoSerializer
