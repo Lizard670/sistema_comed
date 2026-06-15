@@ -100,7 +100,6 @@ class Prontuario(BaseModel):
     horario_inicio = models.TimeField(help_text="Horário de ínicio do prontuário", blank=False, null=False)
     horario_fim = models.TimeField(help_text="Horário de fim do prontuário", blank=False, null=False)
     descricao = models.TextField(help_text="Descrição do prontuário", blank=False, null=False)
-    observacoes = models.TextField(help_text="Observações do prontuário", blank=True, null=True)
     
     TIPOS_ATENDIMENTO = [
     ("consulta", "Consulta"),
@@ -133,10 +132,9 @@ class Declaracao(BaseModel):
     codigo = models.CharField(help_text="Código da Declaracão", max_length=50, unique=True, db_index=True, blank=False, null=False)
     
     descricao = models.TextField(help_text="Descrição da Declaracão", blank=False, null=False)
-    sintomas = models.TextField(help_text="Sintomas do aluno", blank=False, null= False)
-    observacoes_internas = models.TextField(help_text="Observações próprias do(a) responsável pela Declaracão", blank=True, null=True)
+    observacoes_internas = models.TextField(help_text="Observações próprias do(a) responsável pela declaracão", blank=True, null=True)
     
-    prontuario = models.ForeignKey(Prontuario, on_delete=models.PROTECT, related_name="declaracoes", blank=False, null=False)
+    prontuario = models.OneToOneField(Prontuario, on_delete=models.PROTECT, primary_key=True, related_name="declaracoes", blank=False, null=False)
     emitido_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, related_name="declaracoes_emitidas", null=True)
     data_horario_emissao = models.DateTimeField(auto_now_add=True)
     

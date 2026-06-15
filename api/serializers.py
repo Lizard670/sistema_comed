@@ -1,39 +1,25 @@
 from django.urls import path, include
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User
 from rest_framework import routers, serializers
 from core.models import Usuario, Curso, Turma, Aluno, Prontuario, Declaracao
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields =  "__all__"
+        fields =  ["first_name"]
+        
+class UsuarioDetailSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
 
-class UsuarioListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields =  ["id", "user"]
+        fields =  ["id", "matricula", "user"]
     
     def create(self, validated_data):
         user = User.objects.create(**validated_data["user"])
 
         try:
             usuario = Usuario.objects.create(user=user)
-        except Exception as e:
-            user.delete()
-            raise e
-        else:
-            return usuario
-        
-class UsuarioDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Usuario
-        fields =  "__all__"
-    
-    def create(self, validated_data):
-        user = User.objects.create(**validated_data["user"])
-
-        try:
-            usuario = Usuario.objects.create(user=user, matricula=validated_data["matricula"], nascimento=validated_data["nascimento"])
         except Exception as e:
             user.delete()
             raise e
@@ -73,7 +59,7 @@ class AlunoDetailSerializer(serializers.ModelSerializer):
 class ProntuarioListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prontuario
-        fields = ["id", "aluno", "usuario", "data", "tipo_atendimento", "status"]
+        fields = ["id", "aluno", "usuario", "data", "status"]
 
 class ProntuarioDetailSerializer(serializers.ModelSerializer):
     class Meta:
