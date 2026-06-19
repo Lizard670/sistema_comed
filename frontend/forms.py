@@ -1,5 +1,5 @@
 from django import forms
-from .models import Aluno
+from core.models import Aluno
 from datetime import date
 
 
