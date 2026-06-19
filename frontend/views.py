@@ -6,7 +6,17 @@ def pagina_inicial(request):
     return render(request, "index.html")
 
 def pagina_logar(request):
-    return render(request, "logar.html")
+    if request.method == "POST":
+        print(request)
+        form = forms.Login(request.POST)
+        if form.is_valid():
+            # TODO: Validar os dados do usuário e logar caso estejam certos
+            pass
+
+    else:
+        form = forms.Login()
+
+    return render(request, "logar.html", {"form": form})
 
 def pagina_registrar(request):
     return render(request, "registrar.html")
