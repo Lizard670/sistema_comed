@@ -181,7 +181,6 @@ class Estudante(forms.Form):
             
 
 
-            Button('declaracao', 'Gerar declaração', css_class='btn-secondary'),
             Reset('limpar', 'Limpar', css_class='btn-danger'),
             Submit('salvar', 'Salvar', css_class='btn-success')
         )
