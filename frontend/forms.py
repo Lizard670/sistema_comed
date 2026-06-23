@@ -147,7 +147,7 @@ class Estudante(forms.Form):
                 Div('altura', css_class="col-xl-2"),
                 Div('matricula', css_class="col-xl-2"),
                 Div('turma', css_class="col-xl-2"),
-                Div('space', css_class="col-xl-2"),
+                
                 
 
             css_class="row justify-content-between"),
