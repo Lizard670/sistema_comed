@@ -22,19 +22,19 @@ from .views import (
 
 router = DefaultRouter()
 
-router.register(r'cursos', CursoViewSet)
-router.register(r'turmas', TurmaViewSet)
-router.register(r'alunos', AlunoViewSet)
-router.register(r'prontuarios', ProntuarioViewSet)
+router.register(r'cursos', CursoViewSet, basename='api-cursos')
+router.register(r'turmas', TurmaViewSet, basename='api-turmas')
+router.register(r'alunos', AlunoViewSet, basename='api-alunos')
+router.register(r'prontuarios', ProntuarioViewSet, basename='api-prontuarios')
 
 urlpatterns = [
     path('', include(router.urls)),
 
-    path('usuario/<int:pk>/', UsuarioDetailView.as_view(), name='usuario'),
-    path('curso/<int:pk>/', CursoDetailView.as_view(), name='curso'),
-    path('turma/<int:pk>/', TurmaDetailView.as_view(), name='turma'),
-    path('aluno/<int:pk>/', AlunoView.as_view(), name='aluno'),
-    path("aluno/<int:pk>/prontuarios/", AlunoProntuariosView.as_view(), name="aluno-prontuarios"),
-    path('prontuario/<int:pk>/', ProntuarioDetailView.as_view(), name='prontuario'),
-    path('declaracao/<int:pk>/', DeclaracaoDetailView.as_view(), name='declaracao')
+    path('usuario/<int:pk>/', UsuarioDetailView.as_view(), name='api-usuario'),
+    path('curso/<int:pk>/', CursoDetailView.as_view(), name='api-curso'),
+    path('turma/<int:pk>/', TurmaDetailView.as_view(), name='api-turma'),
+    path('aluno/<int:pk>/', AlunoView.as_view(), name='api-aluno'),
+    path("aluno/<int:pk>/prontuarios/", AlunoProntuariosView.as_view(), name="api-aluno-prontuarios"),
+    path('prontuario/<int:pk>/', ProntuarioDetailView.as_view(), name='api-prontuario'),
+    path('declaracao/<int:pk>/', DeclaracaoDetailView.as_view(), name='api-declaracao')
 ]
