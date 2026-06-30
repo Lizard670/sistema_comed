@@ -1,0 +1,2 @@
+# Objetivo
+O presente projeto propõe o desenvolvimento de um sistema web para a cordenação médica(CoMed) do Instituto Federal da Bahia(IFBA) – Campus Porto Seguro, com foco na modernização e digitalização do gerenciamento de atendimentos estudantis.
