@@ -6,13 +6,13 @@ document.getElementById('anoGrafico').value = new Date().getFullYear();
 function gerarDadosHistograma(anoGrafico) {
     let quant_consultas = [0,0,0,0,0,0,0,0,0,0,0,0]
 
-    for (const prontuario of prontuarios) {
-        data_consulta = new Date(prontuario["data"]);
-        if (data_consulta.getFullYear() == anoGrafico){
-            quant_consultas[data_consulta.getMonth()]++;
-        }
+    if (Object.hasOwn(prontuarios, anoGrafico)) {
+        prontuarios[anoGrafico].forEach((mes, index) => {
+            for (const dia of Object.values(mes)) {
+                quant_consultas[index] += dia.length;
+            }
+        });
     }
-
     return quant_consultas;
 }
 

@@ -99,13 +99,30 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@10" type="text/javascript"></script>
         <script src="{% static 'js/tabela-prontuarios.js'%}"></script>
-        <script>var prontuarios = []; var alunos = {};</script>
+        <script>var prontuarios = {}; var alunos = {};</script>
         <script src="{% static 'js/grafico-consultas.js'%}"></script>
         <script>
             fetch("{% url 'api-prontuarios-list' %}")
             .then(response => response.json())
             .then(data => {
-                prontuarios = data;
+                for (const prontuario of data) {
+                    data_consulta = new Date(prontuario["data"]);
+                    const ano = data_consulta.getFullYear();
+                    const mes = data_consulta.getMonth();
+                    const dia = data_consulta.getDate();
+                    
+
+                    // Cria o ano se ainda não tinha sido criado
+                    if (!Object.hasOwn(prontuarios, ano)) {
+                        prontuarios[ano] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+                    }
+                    // Cria o dia se ainda não tinha sido criado
+                    if (!Object.hasOwn(prontuarios[ano][mes], dia)) {
+                        prontuarios[ano][mes][dia] = [];
+                    }
+
+                    prontuarios[ano][mes][dia].push(prontuario);
+                }
                 atualizarGraficoConsultas(graficoConsultas);
             })
             .catch(error => console.error('Erro ao pegar dados dos prontuários:', error));
