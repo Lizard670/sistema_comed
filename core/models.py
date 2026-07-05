@@ -123,7 +123,7 @@ class Prontuario(BaseModel):
         db_table = "prontuario"
         verbose_name = "Prontuário"
         verbose_name_plural = "Prontuários"
-        ordering = ["-updated_at"]
+        ordering = ["-data"]
         
     def __str__(self):
         return f"Prontuário #{self.id}"
