@@ -49,3 +49,7 @@ def pagina_prontuario(request):
         form = forms.Prontuario()
 
     return render(request, "prontuario.html", {"form": form})
+
+def pagina_validar_declaracao(request, codigo=None):
+    """Página pública para validar a autenticidade de uma declaração pelo código."""
+    return render(request, "validar_declaracao.html", {"codigo": codigo})
