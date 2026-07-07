@@ -1,20 +1,21 @@
-from django.urls import path, include
 from django.contrib.auth.models import User
-from rest_framework import routers, serializers
+from rest_framework import serializers
 from core.models import Usuario, Curso, Turma, Aluno, Prontuario, Declaracao
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields =  ["first_name"]
-        
+        fields = ["first_name"]
+
+
 class UsuarioDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = Usuario
-        fields =  ["id", "matricula", "user"]
-    
+        fields = ["id", "matricula", "user"]
+
     def create(self, validated_data):
         user = User.objects.create(**validated_data["user"])
 
@@ -26,47 +27,92 @@ class UsuarioDetailSerializer(serializers.ModelSerializer):
         else:
             return usuario
 
+
 class CursoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curso
-        fields =  ["id", "nome"]
+        fields = ["id", "nome"]
+
 
 class CursoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curso
-        fields =  "__all__"
+        fields = "__all__"
+
 
 class TurmaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turma
-        fields =  ["id", "nome", "curso"]
+        fields = ["id", "nome", "curso"]
+
 
 class TurmaDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turma
-        fields =  "__all__"
+        fields = "__all__"
+
 
 class AlunoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aluno
         fields = ["id", "matricula", "nome", "nome_responsavel", "turma"]
 
+
 class AlunoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aluno
-        fields =  "__all__"
+        fields = "__all__"
+
 
 class ProntuarioListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prontuario
         fields = ["id", "aluno", "usuario", "data", "status"]
 
+
 class ProntuarioDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prontuario
-        fields =  "__all__"
+        fields = "__all__"
+
+
+# Serializers aninhados para composição do PDF do atestado
+class _AlunoAtestadoSerializer(serializers.ModelSerializer):
+    """Dados do aluno necessários para compor o PDF do atestado."""
+    turma_nome = serializers.CharField(source='turma.nome', read_only=True)
+    curso_nome = serializers.CharField(source='turma.curso.nome', read_only=True)
+
+    class Meta:
+        model = Aluno
+        fields = ['nome', 'matricula', 'nascimento', 'turma_nome', 'curso_nome']
+
+
+class _ProntuarioAtestadoSerializer(serializers.ModelSerializer):
+    """Dados do prontuário necessários para compor o PDF do atestado."""
+    aluno = _AlunoAtestadoSerializer(read_only=True)
+
+    class Meta:
+        model = Prontuario
+        fields = ['id', 'data', 'horario_inicio', 'horario_fim', 'tipo_atendimento', 'aluno']
+
 
 class DeclaracaoSerializer(serializers.ModelSerializer):
+    # Campos gerados/definidos pelo backend
+    codigo = serializers.CharField(read_only=True)
+    emitido_por = serializers.PrimaryKeyRelatedField(read_only=True)
+    data_horario_emissao = serializers.DateTimeField(read_only=True)
+
+    # Dados aninhados retornados na resposta para o frontend montar o PDF
+    prontuario_detalhes = _ProntuarioAtestadoSerializer(source='prontuario', read_only=True)
+
     class Meta:
         model = Declaracao
-        fields = "__all__"
+        fields = [
+            'prontuario',
+            'descricao',
+            'observacoes_internas',
+            'codigo',
+            'emitido_por',
+            'data_horario_emissao',
+            'prontuario_detalhes',
+        ]
