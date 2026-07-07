@@ -8,4 +8,6 @@ urlpatterns = [
     path("resetar_senha", views.pagina_resetar_senha, name="resetar_senha"),
     path("estudantes", views.pagina_estudantes, name="estudantes"),
     path("prontuario", views.pagina_prontuario, name="prontuario"),
+    path("validar/", views.pagina_validar_declaracao, name="validar_declaracao"),
+    path("validar/<str:codigo>/", views.pagina_validar_declaracao, name="validar_declaracao_codigo"),
 ]
