@@ -53,56 +53,12 @@
                         {% csrf_token %}
                         {% crispy form form.helper %}
                     </form>
+                    
+                    <div id="declErro" class="alert alert-danger d-none" role="alert"></div>
                 </div>
             </main>
 
             {% include 'rodape.html'%}
-        </div>
-    </div>
-
-    <!-- Modal: Gerar Declaração -->
-    <div class="modal fade" id="modalDeclaracao" tabindex="-1" aria-labelledby="modalDeclaracaoLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header" style="background-color: #187D75; color: white;">
-                    <h5 class="modal-title" id="modalDeclaracaoLabel">
-                        <i class="fas fa-file-medical me-2"></i>Gerar Declaração Médica
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="declProntuarioId" class="form-label fw-semibold">ID do Prontuário</label>
-                        <input type="number" class="form-control" id="declProntuarioId" placeholder="Ex: 1" min="1"
-                            required>
-                        <div class="form-text">Informe o ID numérico do prontuário ao qual a declaração se refere.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="declDescricao" class="form-label fw-semibold">Descrição da Declaração</label>
-                        <textarea class="form-control" id="declDescricao" rows="5"
-                            placeholder="Descreva as condições da declaração, diagnóstico, período de repouso, etc."
-                            required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="declObservacoes" class="form-label fw-semibold">
-                            Observações Internas
-                            <span class="text-muted fw-normal">(não aparece no PDF)</span>
-                        </label>
-                        <textarea class="form-control" id="declObservacoes" rows="2"
-                            placeholder="Observações internas (opcional)"></textarea>
-                    </div>
-                    <div id="declErro" class="alert alert-danger d-none" role="alert"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnGerarDeclaracaoPdf" class="btn"
-                        style="background-color: #187D75; color: white;">
-                        <i class="fas fa-file-pdf me-1"></i> Gerar e Baixar PDF
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -115,13 +71,6 @@
     <script src="{% static 'js/scripts.js'%}"></script>
 
     <script>
-        // Utilitário CSRF
-        function getCsrfToken() {
-            const cookie = document.cookie.split(';')
-                .find(c => c.trim().startsWith('csrftoken='));
-            return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
-        }
-
         // Função auxiliar para converter um elemento <img> em Base64 PNG
         function obterBase64DaImagem(imgElement) {
             try {
@@ -286,85 +235,50 @@
             doc.save(`declaracao_${codigo}.pdf`);
         }
 
-        // Listener do botão do modal
-        document.getElementById('btnGerarDeclaracaoPdf').addEventListener('click', async function () {
-            const prontuarioId = document.getElementById('declProntuarioId').value;
-            const descricao = document.getElementById('declDescricao').value.trim();
-            const observacoes = document.getElementById('declObservacoes').value.trim();
-            const erroDiv = document.getElementById('declErro');
-
-            erroDiv.classList.add('d-none');
-
-            if (!prontuarioId || !descricao) {
-                erroDiv.textContent = 'Preencha o ID do prontuário e a descrição.';
-                erroDiv.classList.remove('d-none');
-                return;
-            }
-
-            const btn = this;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Gerando...';
-
-            try {
-                const resp = await fetch('/api/declaracao/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken(),
-                    },
-                    body: JSON.stringify({
-                        prontuario: parseInt(prontuarioId, 10),
-                        descricao: descricao,
-                        observacoes_internas: observacoes || null,
-                    }),
-                });
-
-                if (!resp.ok) {
-                    // A resposta pode ser HTML (ex: página de login 403) — não tenta JSON direto
-                    let errMsg = `Erro HTTP ${resp.status}`;
-                    const contentType = resp.headers.get('content-type') || '';
-                    if (contentType.includes('application/json')) {
-                        const err = await resp.json();
-                        errMsg = JSON.stringify(err);
-                    } else if (resp.status === 403) {
-                        errMsg = 'Acesso negado (403). Verifique se você está autenticado.';
-                    } else {
-                        errMsg = `Erro HTTP ${resp.status}. Verifique o console para mais detalhes.`;
-                        console.error('Resposta inesperada:', await resp.text());
-                    }
-                    throw new Error(errMsg);
-                }
-
-                const data = await resp.json();
-
-                // Fecha o modal e dispara o download
-                bootstrap.Modal.getInstance(
-                    document.getElementById('modalDeclaracao')
-                ).hide();
-                gerarPdfDeclaracao(data);
-
-                // Limpa o formulário
-                document.getElementById('declProntuarioId').value = '';
-                document.getElementById('declDescricao').value = '';
-                document.getElementById('declObservacoes').value = '';
-
-            } catch (e) {
-                erroDiv.textContent = 'Erro ao gerar declaração: ' + e.message;
-                erroDiv.classList.remove('d-none');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-file-pdf me-1"></i> Gerar e Baixar PDF';
-            }
-        });
-        // Liga o botão 'Gerar declaração' do crispy form ao modal
+        // Listener do botão 'Gerar declaração' do crispy form
         const btnCrispy = document.querySelector('input[name="declaracao"], button[name="declaracao"]');
         if (btnCrispy) {
             // Impede o submit acidental
-            btnCrispy.addEventListener('click', function (e) {
-                e.preventDefault();
+            btnCrispy.addEventListener('click', async function () {
+                const prontuarioId = "{{pk|default:'0'}}";
+                const erroDiv = document.getElementById('declErro');
+
+                erroDiv.classList.add('d-none');
+                this.disabled = true;
+
+                try {
+                    const resp = await fetch('/api/declaracao/'+prontuarioId+'/');
+
+                    if (!resp.ok) {
+                        // A resposta pode ser HTML (ex: página de login 403) — não tenta JSON direto
+                        let errMsg = `Erro HTTP ${resp.status}`;
+                        const contentType = resp.headers.get('content-type') || '';
+                        if (resp.status === 403) {
+                            errMsg = 'Acesso negado (403). Verifique se você está autenticado.';
+                        } else if (resp.status === 404) {;
+                            errMsg = 'Declaração não encontrada (404). Lembre-se de salvar a declaração antes de gerar o pdf.';
+                        } else if (contentType.includes('application/json')) {
+                            const err = await resp.json();
+                            errMsg = JSON.stringify(err);
+                        } else {
+                            errMsg = `Erro HTTP ${resp.status}. Verifique o console para mais detalhes.`;
+                            console.error('Resposta inesperada:', await resp.text());
+                        }
+                        throw new Error(errMsg);
+                    }
+
+                    const data = await resp.json();
+
+                    // Gera e dispara o download do PDF
+                    gerarPdfDeclaracao(data);
+
+                } catch (e) {
+                    erroDiv.textContent = 'Erro ao gerar pdf: ' + e.message;
+                    erroDiv.classList.remove('d-none');
+                } finally {
+                    this.disabled = false;
+                }
             });
-            btnCrispy.setAttribute('data-bs-toggle', 'modal');
-            btnCrispy.setAttribute('data-bs-target', '#modalDeclaracao');
         }
     </script>
 </body>
