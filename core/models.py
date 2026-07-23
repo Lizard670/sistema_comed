@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.timezone import now
+import uuid
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -129,8 +130,8 @@ class Prontuario(BaseModel):
         return f"Prontuário #{self.id}"
 
 class Declaracao(BaseModel):
-    codigo = models.CharField(help_text="Código da Declaracão", max_length=50, unique=True, db_index=True, blank=False, null=False)
-    
+    codigo = models.UUIDField(default=uuid.uuid4, editable=False, help_text="Código da Declaracão", unique=True, blank=False, null=False)
+
     descricao = models.TextField(help_text="Descrição da Declaracão", blank=False, null=False)
     observacoes_internas = models.TextField(help_text="Observações próprias do(a) responsável pela declaracão", blank=True, null=True)
     
