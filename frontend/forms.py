@@ -1,5 +1,5 @@
 from django import forms
-from core.models import Aluno
+from core.models import Aluno, Prontuario
 from datetime import date
 
 
@@ -45,7 +45,7 @@ class Prontuario(forms.Form):
     paciente = forms.ModelChoiceField(label="Paciente", 
                                       queryset=Aluno.objects.all())
     data = forms.DateField(label="Data da consulta", 
-                           initial=date.today, 
+                           initial=date.today().strftime("%Y-%m-%d"), 
                            widget=forms.DateInput(attrs={'type': 'date'}))
     
     inicio = forms.TimeField(label="Horário início", 
@@ -53,14 +53,25 @@ class Prontuario(forms.Form):
     fim = forms.TimeField(label="Horário fim", 
                              widget=forms.TimeInput(attrs={'type': 'time'}))
     
+    status = forms.ChoiceField(label="Status", 
+                               choices=Prontuario._meta.get_field('status').choices)
+    tipo_atendimento = forms.ChoiceField(label="Tipo de atendimento", 
+                                         choices=Prontuario._meta.get_field('tipo_atendimento').choices)
+    
     descricao = forms.CharField(label="",
                                 widget=forms.Textarea())
     
     declaracao = forms.CharField(label="",
-                                 widget=forms.Textarea())
+                                 widget=forms.Textarea(), 
+                                 required=False)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        editando = True if self.initial else False
+        texto_botao_sucesso = "Salvar prontuário" if editando else "Criar prontuário"
+        classe_desativar = "" if editando else "disabled"
+        atributo_desativar = "" if editando else 'disabled=""'
 
         self.helper = FormHelper
         self.helper.form_method = 'post'
@@ -75,17 +86,23 @@ class Prontuario(forms.Form):
                 Div('data', css_class="col-xl-2"),
                 Div('inicio', css_class="col-xl-2"),
                 Div('fim', css_class="col-xl-2"),
-            css_class="row"),
+                Div('status', css_class="col-xl-2"),
+                Div('tipo_atendimento', css_class="col-xl-2"),
+            css_class="row d-flex align-items-end justify-content-between"),
 
             HTML('<h3>Descrição interna</h1>'),
             'descricao',
 
             HTML('<h3>Texto declaração</h1>'),
-            'declaracao',
+            HTML('<div id="div_id_declaracao" class="mb-3 row"> '
+                 f'<textarea name="declaracao" cols="40" rows="10" class="textarea form-control" id="id_declaracao" {atributo_desativar}></textarea> '
+                 '</div>'),
+            
 
-            Button('declaracao', 'Gerar declaração', css_class='btn-secondary'),
             Reset('limpar', 'Limpar', css_class='btn-danger'),
-            Submit('salvar', 'Salvar', css_class='btn-success')
+            Submit('salvar_prontuario', texto_botao_sucesso, css_class='btn-success'),
+            Submit('salvar_declaracao', 'Salvar declaração', css_class=f"btn-success {classe_desativar}"),
+            Button('declaracao', 'Gerar PDF', css_class=f"btn-secondary {classe_desativar}")
         )
 
 

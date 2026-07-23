@@ -25,7 +25,7 @@
                     <div class="container-fluid px-4">
                         <h1 class="mt-4">Prontuário</h1>
                         
-                        <form action="/prontuario/" method="post">
+                        <form action="{% url 'prontuario' pk=pk %}" method="post">
                             {% csrf_token %}
                             {% crispy form form.helper %}
                         </form>
