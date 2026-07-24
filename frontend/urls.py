@@ -10,4 +10,6 @@ urlpatterns = [
     path('prontuario/<int:pk>/', views.pagina_prontuario, name='prontuario'),
     path("prontuario/", views.pagina_prontuario, name="prontuario"),
     path("prontuario", views.pagina_prontuario, name="prontuario"),
+    path("validar/", views.pagina_validar_declaracao, name="validar_declaracao"),
+    path("validar/<str:codigo>/", views.pagina_validar_declaracao, name="validar_declaracao_codigo"),
 ]

@@ -137,7 +137,7 @@ class Declaracao(BaseModel):
     
     prontuario = models.OneToOneField(Prontuario, on_delete=models.PROTECT, primary_key=True, related_name="declaracoes", blank=False, null=False)
     emitido_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, related_name="declaracoes_emitidas", null=True)
-    data_horario_emissao = models.DateTimeField(auto_now_add=True)
+    data_horario_emissao = models.DateTimeField(auto_now_add=True)  
     
     class Meta(BaseModel.Meta):
         db_table = "declaracao"
