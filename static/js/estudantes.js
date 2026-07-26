@@ -1,6 +1,7 @@
 // ─── Utilitários ─────────────────────────────────────────────────────────────
 
 function formatarData(dataStr) {
+    // API devolve "YYYY-MM-DD", exibe "DD/MM/AAAA"
     if (!dataStr) return "—";
     const [ano, mes, dia] = dataStr.split("-");
     return `${dia}/${mes}/${ano}`;
@@ -21,12 +22,39 @@ function getCookie(name) {
     return match ? match.pop() : "";
 }
 
+// Converte "DD/MM/AAAA" → "YYYY-MM-DD" para enviar à API
+function dataParaISO(dataStr) {
+    if (!dataStr) return "";
+    const [dia, mes, ano] = dataStr.split("/");
+    return `${ano}-${mes}-${dia}`;
+}
+
+// Converte "YYYY-MM-DD" → "DD/MM/AAAA" para preencher os campos
+function dataParaExibicao(dataStr) {
+    if (!dataStr) return "";
+    const [ano, mes, dia] = dataStr.split("-");
+    return `${dia}/${mes}/${ano}`;
+}
+
+// Aplica máscara DD/MM/AAAA em tempo real enquanto o usuário digita
+function aplicarMascaraData(input) {
+    input.addEventListener("input", () => {
+        let v = input.value.replace(/\D/g, ""); // remove tudo que não é número
+        if (v.length > 2)  v = v.slice(0,2) + "/" + v.slice(2);
+        if (v.length > 5)  v = v.slice(0,5) + "/" + v.slice(5);
+        if (v.length > 10) v = v.slice(0,10);
+        input.value = v;
+    });
+}
+
 // ─── Estado global ────────────────────────────────────────────────────────────
 
-var turmas     = {};
-var alunos     = {};
-var calendario = null;
-var tabelaSimple = null;
+var turmas           = {};  // id -> objeto turma
+var cursos           = {};  // id -> objeto curso
+var alunos           = {};  // id -> objeto aluno
+var calendario       = null;
+var tabelaSimple     = null;
+var alunoSelecionadoId = null;
 
 // ─── Calendário ───────────────────────────────────────────────────────────────
 
@@ -48,11 +76,14 @@ function atualizarCalendario(prontuarios) {
 // ─── Tabela de Alunos ─────────────────────────────────────────────────────────
 
 function carregarTabelaAlunos() {
+    // Busca cursos, turmas e alunos em paralelo
     Promise.all([
+        fetch(urlApiCursos).then(r => r.json()),
         fetch(urlApiTurmas).then(r => r.json()),
         fetch(urlApiAlunos).then(r => r.json())
     ])
-    .then(([dadosTurmas, dadosAlunos]) => {
+    .then(([dadosCursos, dadosTurmas, dadosAlunos]) => {
+        dadosCursos.forEach(c => { cursos[c.id] = c; });
         dadosTurmas.forEach(t => { turmas[t.id] = t; });
         dadosAlunos.forEach(a => { alunos[a.id] = a; });
 
@@ -62,7 +93,8 @@ function carregarTabelaAlunos() {
         corpo.innerHTML = "";
 
         dadosAlunos.forEach(aluno => {
-            const nomeTurma = turmas[aluno.turma] ? turmas[aluno.turma].nome : "—";
+            const turma    = turmas[aluno.turma];
+            const nomeTurma = turma ? turma.nome : "—";
             const tr = document.createElement("tr");
             tr.dataset.alunoId = aluno.id;
             tr.innerHTML = `
@@ -95,12 +127,12 @@ function selecionarAluno(idAluno, trClicado) {
             .forEach(tr => tr.classList.remove("selecionado"));
     trClicado.classList.add("selecionado");
 
-    alunoSelecionadoId = idAluno; // guarda para o modal de edição usar
+    alunoSelecionadoId = idAluno;
 
     document.getElementById("nomeAlunoSelecionado").textContent = alunos[idAluno].nome;
     document.getElementById("secaoHistorico").classList.remove("oculto");
     document.getElementById("mensagem-selecione").style.display = "none";
-    document.getElementById("btnAbrirEditar").disabled = false; // habilita o botão editar
+    document.getElementById("btnAbrirEditar").disabled = false;
 
     carregarHistorico(idAluno);
 }
@@ -144,34 +176,44 @@ function carregarHistorico(idAluno) {
         .catch(err => console.error("Erro ao carregar histórico:", err));
 }
 
+// ─── Preenche select de turmas com "Turma · Curso" ───────────────────────────
+
+function preencherSelectTurmas(selectId, turmaSelecionadaId) {
+    fetch(urlApiTurmas)
+        .then(r => r.json())
+        .then(dados => {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">Selecione a turma</option>';
+            dados.forEach(t => {
+                const opt       = document.createElement("option");
+                opt.value       = t.id;
+                // Mostra "ALM1A · Alimentos" se o curso existir, senão só "ALM1A"
+                const nomeCurso = cursos[t.curso] ? cursos[t.curso].nome : "";
+                opt.textContent = nomeCurso ? `${t.nome} · ${nomeCurso}` : t.nome;
+                if (t.id === turmaSelecionadaId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        });
+}
+
 // ─── Adicionar Aluno ──────────────────────────────────────────────────────────
 
 function registrarEventosModal() {
-    // Preenche o select de turmas quando o modal abre
+    // Preenche turmas quando o modal abre
     document.getElementById("modalAdicionarAluno").addEventListener("show.bs.modal", () => {
-        fetch(urlApiTurmas)
-            .then(r => r.json())
-            .then(dados => {
-                const select = document.getElementById("novoTurma");
-                select.innerHTML = '<option value="">Selecione a turma</option>';
-                dados.forEach(t => {
-                    const opt = document.createElement("option");
-                    opt.value = t.id;
-                    opt.textContent = t.nome;
-                    select.appendChild(opt);
-                });
-            });
+        preencherSelectTurmas("novoTurma", null);
     });
 
-    // Salvar aluno
     document.getElementById("btnSalvarAluno").addEventListener("click", () => {
         const msgErro = document.getElementById("erroAdicionarAluno");
         msgErro.style.display = "none";
 
+        const dataDigitada = document.getElementById("novoNascimento").value;
+
         const payload = {
             nome:             document.getElementById("novoNome").value.trim(),
             matricula:        document.getElementById("novaMatricula").value.trim(),
-            nascimento:       document.getElementById("novoNascimento").value,
+            nascimento:       dataParaISO(dataDigitada), // converte DD/MM/AAAA → YYYY-MM-DD
             nome_responsavel: document.getElementById("novoResponsavel").value.trim(),
             turma:            parseInt(document.getElementById("novoTurma").value),
             tipo_sanguineo:   document.getElementById("novoTipoSanguineo").value || null,
@@ -190,18 +232,11 @@ function registrarEventosModal() {
 
         fetch(urlApiAlunos, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-            },
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
             body: JSON.stringify(payload)
         })
         .then(r => {
-            if (!r.ok) {
-                return r.json()
-                    .catch(() => { throw new Error(`Erro ${r.status}: ${r.statusText}`); })
-                    .then(e => { throw e; });
-            }
+            if (!r.ok) return r.json().catch(() => { throw new Error(`Erro ${r.status}: ${r.statusText}`); }).then(e => { throw e; });
             return r.json();
         })
         .then(() => {
@@ -210,45 +245,26 @@ function registrarEventosModal() {
         })
         .catch(erro => {
             console.error("Erro ao salvar aluno:", erro);
-            let mensagem;
-            if (erro instanceof Error) {
-                mensagem = erro.message;
-            } else if (erro.detail) {
-                mensagem = erro.detail;
-            } else {
-                mensagem = Object.entries(erro)
-                    .map(([campo, msgs]) => `${campo}: ${[].concat(msgs).join(", ")}`)
-                    .join(" | ");
-            }
+            const mensagem = erro instanceof Error ? erro.message
+                           : erro.detail ? erro.detail
+                           : Object.entries(erro).map(([c, m]) => `${c}: ${[].concat(m).join(", ")}`).join(" | ");
             msgErro.textContent = "Erro: " + mensagem;
             msgErro.style.display = "block";
         });
     });
 }
 
-// ─── Inicialização — tudo começa aqui, depois que o DOM e os scripts carregaram
-
-document.addEventListener("DOMContentLoaded", () => {
-    iniciarCalendario();
-    carregarTabelaAlunos();
-    registrarEventosModal();  // registra APÓS o Bootstrap já estar disponível
-    registrarEventosEditar(); // idem para o modal de edição
-});
-
 // ─── Editar Aluno ─────────────────────────────────────────────────────────────
 
-var alunoSelecionadoId = null; // guarda qual aluno está selecionado
-
 function registrarEventosEditar() {
-    // Quando o modal de editar abre, preenche os campos com os dados do aluno selecionado
     document.getElementById("modalEditarAluno").addEventListener("show.bs.modal", () => {
         const aluno = alunos[alunoSelecionadoId];
         if (!aluno) return;
 
-        // Preenche cada campo com o valor atual do aluno
         document.getElementById("editNome").value         = aluno.nome || "";
         document.getElementById("editMatricula").value    = aluno.matricula || "";
-        document.getElementById("editNascimento").value   = aluno.nascimento || "";
+        // Converte YYYY-MM-DD para DD/MM/AAAA para exibir no campo com máscara
+        document.getElementById("editNascimento").value   = dataParaExibicao(aluno.nascimento);
         document.getElementById("editResponsavel").value  = aluno.nome_responsavel || "";
         document.getElementById("editTipoSanguineo").value = aluno.tipo_sanguineo || "";
         document.getElementById("editPeso").value         = aluno.peso || "";
@@ -257,32 +273,19 @@ function registrarEventosEditar() {
         document.getElementById("editRestricoes").value   = aluno.restricoes || "";
         document.getElementById("editObservacoes").value  = aluno.observacoes || "";
 
-        // Carrega as turmas no select e marca a turma atual do aluno
-        fetch(urlApiTurmas)
-            .then(r => r.json())
-            .then(dados => {
-                const select = document.getElementById("editTurma");
-                select.innerHTML = '<option value="">Selecione a turma</option>';
-                dados.forEach(t => {
-                    const opt = document.createElement("option");
-                    opt.value = t.id;
-                    opt.textContent = t.nome;
-                    // Pré-seleciona a turma que o aluno já tem
-                    if (t.id === aluno.turma) opt.selected = true;
-                    select.appendChild(opt);
-                });
-            });
+        preencherSelectTurmas("editTurma", aluno.turma);
     });
 
-    // Salvar edição
     document.getElementById("btnSalvarEdicao").addEventListener("click", () => {
         const msgErro = document.getElementById("erroEditarAluno");
         msgErro.style.display = "none";
 
+        const dataDigitada = document.getElementById("editNascimento").value;
+
         const payload = {
             nome:             document.getElementById("editNome").value.trim(),
             matricula:        document.getElementById("editMatricula").value.trim(),
-            nascimento:       document.getElementById("editNascimento").value,
+            nascimento:       dataParaISO(dataDigitada), // converte DD/MM/AAAA → YYYY-MM-DD
             nome_responsavel: document.getElementById("editResponsavel").value.trim(),
             turma:            parseInt(document.getElementById("editTurma").value),
             tipo_sanguineo:   document.getElementById("editTipoSanguineo").value || null,
@@ -299,44 +302,40 @@ function registrarEventosEditar() {
             return;
         }
 
-        // PATCH envia só os campos alterados para /api/alunos/<id>/
         fetch(urlApiAlunos + alunoSelecionadoId + "/", {
             method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-            },
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
             body: JSON.stringify(payload)
         })
         .then(r => {
-            if (!r.ok) {
-                return r.json()
-                    .catch(() => { throw new Error(`Erro ${r.status}: ${r.statusText}`); })
-                    .then(e => { throw e; });
-            }
+            if (!r.ok) return r.json().catch(() => { throw new Error(`Erro ${r.status}: ${r.statusText}`); }).then(e => { throw e; });
             return r.json();
         })
         .then(alunoAtualizado => {
-            // Atualiza o objeto local para refletir as mudanças sem precisar recarregar tudo
             alunos[alunoSelecionadoId] = alunoAtualizado;
             bootstrap.Modal.getInstance(document.getElementById("modalEditarAluno")).hide();
-            // Recarrega a tabela para mostrar o nome/turma atualizados
             carregarTabelaAlunos();
         })
         .catch(erro => {
             console.error("Erro ao editar aluno:", erro);
-            let mensagem;
-            if (erro instanceof Error) {
-                mensagem = erro.message;
-            } else if (erro.detail) {
-                mensagem = erro.detail;
-            } else {
-                mensagem = Object.entries(erro)
-                    .map(([campo, msgs]) => `${campo}: ${[].concat(msgs).join(", ")}`)
-                    .join(" | ");
-            }
+            const mensagem = erro instanceof Error ? erro.message
+                           : erro.detail ? erro.detail
+                           : Object.entries(erro).map(([c, m]) => `${c}: ${[].concat(m).join(", ")}`).join(" | ");
             msgErro.textContent = "Erro: " + mensagem;
             msgErro.style.display = "block";
         });
     });
 }
+
+// ─── Inicialização ────────────────────────────────────────────────────────────
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Aplica máscara DD/MM/AAAA nos campos de data dos dois modais
+    aplicarMascaraData(document.getElementById("novoNascimento"));
+    aplicarMascaraData(document.getElementById("editNascimento"));
+
+    iniciarCalendario();
+    carregarTabelaAlunos();
+    registrarEventosModal();
+    registrarEventosEditar();
+});

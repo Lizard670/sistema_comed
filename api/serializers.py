@@ -49,7 +49,7 @@ class TurmaDetailSerializer(serializers.ModelSerializer):
 class AlunoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aluno
-        fields = ["id", "matricula", "nome", "nome_responsavel", "turma"]
+        fields = ["id", "matricula", "nome", "nome_responsavel", "turma", "nascimento"]
 
 class AlunoDetailSerializer(serializers.ModelSerializer):
     class Meta:

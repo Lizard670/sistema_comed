@@ -251,7 +251,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Data de nascimento <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="editNascimento">
+                                <input type="text" class="form-control" id="editNascimento" placeholder="DD/MM/AAAA" maxlength="10">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Tipo sanguíneo</label>
@@ -324,7 +324,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Data de nascimento <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="novoNascimento">
+                                <input type="text" class="form-control" id="novoNascimento" placeholder="DD/MM/AAAA" maxlength="10">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Tipo sanguíneo</label>
@@ -385,6 +385,7 @@
         <!-- URLs da API passadas para o JS -->
         <script>
             var urlApiAlunos    = "{% url 'api-alunos-list' %}";
+            var urlApiCursos    = "{% url 'api-cursos-list' %}";
             var urlApiTurmas    = "{% url 'api-turmas-list' %}";
             var urlAlunoProntuarios = "/api/aluno/ID_ALUNO/prontuarios/";
         </script>
