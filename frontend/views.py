@@ -110,11 +110,10 @@ def pagina_prontuario(request, pk=0):
                 'descricao': prontuario.descricao
             }
             try:
-                declaracao = Declaracao.objects.get(prontuario=pk)
+                declaracao = Declaracao.objects.get(prontuario_id=pk)
                 initial['declaracao'] = declaracao.descricao
             except Declaracao.DoesNotExist as e:
-                pass
-            
+                print("- O Prontuário {pk} não possúi declaração")
             form = forms.Prontuario(initial=initial)
             
         except Prontuario.DoesNotExist as e:

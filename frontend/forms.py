@@ -4,7 +4,7 @@ from datetime import date
 
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Button, Div, HTML, Reset, Submit
+from crispy_forms.layout import Layout, Button, Div, HTML, Reset, Submit, Field
 
 
 
@@ -71,8 +71,8 @@ class Prontuario(forms.Form):
         editando = True if self.initial else False
         texto_botao_sucesso = "Salvar prontuário" if editando else "Criar prontuário"
         classe_desativar = "" if editando else "disabled"
-        atributo_desativar = "" if editando else 'disabled=""'
-
+        if not editando: self.fields["declaracao"].widget.attrs["disabled"] = ""
+        print(self.initial)
         self.helper = FormHelper
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-horizontal'
@@ -94,9 +94,7 @@ class Prontuario(forms.Form):
             'descricao',
 
             HTML('<h3>Texto declaração</h1>'),
-            HTML('<div id="div_id_declaracao" class="mb-3 row"> '
-                 f'<textarea name="declaracao" cols="40" rows="10" class="textarea form-control" id="id_declaracao" {atributo_desativar}></textarea> '
-                 '</div>'),
+            'declaracao',
             
 
             Reset('limpar', 'Limpar', css_class='btn-danger'),
