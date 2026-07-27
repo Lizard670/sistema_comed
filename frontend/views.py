@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404, render
 from django.http import HttpResponseBadRequest
 from django.urls import reverse
 from django.utils.timezone import now
@@ -118,7 +118,16 @@ def pagina_prontuario(request, pk=0, err=""):
         except Prontuario.DoesNotExist as e:
             return HttpResponseBadRequest()
     else:
-        form = forms.Prontuario()
+        valores_iniciais = {}
+        if prontuario:
+            valores_iniciais = {
+                "paciente": prontuario.aluno_id,
+                "data": prontuario.data,
+                "inicio": prontuario.horario_inicio,
+                "fim": prontuario.horario_fim,
+                "descricao": prontuario.descricao,
+            }
+        form = forms.Prontuario(initial=valores_iniciais)
 
     return render(request, "prontuario.html", {"form": form, "pk": pk, "err": err})
 

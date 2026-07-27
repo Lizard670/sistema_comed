@@ -1,5 +1,5 @@
 from django import forms
-from core.models import Aluno, Prontuario
+from core.models import Aluno, Turma, Prontuario
 from datetime import date
 
 
@@ -107,9 +107,20 @@ class Estudante(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Os valores também são usados pelo JavaScript quando um aluno é
+        # selecionado na tabela. Sem essas opções, definir ``select.value``
+        # não produz nenhum valor visível no formulário.
+        self.fields["turma"].choices = [("", "Selecione uma turma")] + [
+            (turma.pk, turma.nome) for turma in Turma.objects.select_related("curso")
+        ]
+        self.fields["tipo"].choices = [("", "Selecione o tipo sanguíneo")] + list(
+            Aluno.TIPOS_SANGUINEOS
+        )
+
         self.helper = FormHelper
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-horizontal'
+        self.helper.form_tag = False
 
         self.helper.layout = Layout(
             Div(
