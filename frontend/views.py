@@ -10,6 +10,7 @@ def pagina_logar(request):
         print(request)
         form = forms.Login(request.POST)
         if form.is_valid():
+            
             # TODO: Validar os dados do usuário e logar caso estejam certos
             pass
 
