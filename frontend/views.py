@@ -119,7 +119,7 @@ def pagina_prontuario(request, pk=0, err=""):
             return HttpResponseBadRequest()
     else:
         valores_iniciais = {}
-        if prontuario:
+        if pk!=0:
             valores_iniciais = {
                 "paciente": prontuario.aluno_id,
                 "data": prontuario.data,

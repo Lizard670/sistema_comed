@@ -29,7 +29,8 @@ class Prontuario(forms.Form):
                                 widget=forms.Textarea())
     
     declaracao = forms.CharField(label="",
-                                 widget=forms.Textarea(), 
+                                 widget=forms.Textarea(),
+                                 initial="Declaro para os devidos fins que [[Aluno]] foi atendido neste setor apresentando", 
                                  required=False)
     
     def __init__(self, *args, **kwargs):
