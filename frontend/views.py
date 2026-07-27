@@ -2,32 +2,23 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest
 from django.urls import reverse
 from django.utils.timezone import now
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 from . import forms 
 from core.models import Prontuario, Declaracao, Usuario, Aluno
 
+@login_required
 def pagina_inicial(request):
+    print("-"*10)
+    print(request.user)
     return render(request, "index.html")
 
-def pagina_logar(request):
-    if request.method == "POST":
-        print(request)
-        form = forms.Login(request.POST)
-        if form.is_valid():
-            # TODO: Validar os dados do usuário e logar caso estejam certos
-            pass
+def pagina_deslogar(request):
+    logout(request)
+    return redirect(reverse("login"))
 
-    else:
-        form = forms.Login()
-
-    return render(request, "logar.html", {"form": form})
-
-def pagina_registrar(request):
-    return render(request, "registrar.html")
-
-def pagina_resetar_senha(request):
-    return render(request, "resetar_senha.html")
-
+@login_required
 def pagina_estudantes(request):
     if request.method == "POST":
         print(request)
@@ -41,6 +32,7 @@ def pagina_estudantes(request):
 
     return render(request, "estudantes.html", {"form": form})
 
+@login_required
 def pagina_prontuario(request, pk=0):
     if request.method == "POST":
         form = forms.Prontuario(request.POST)
