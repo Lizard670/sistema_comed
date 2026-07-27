@@ -73,6 +73,14 @@
     <script src="{% static 'js/scripts.js'%}"></script>
 
     <script>
+        // Se foi passado, exibe erro
+        let err = "{{err|default:'0'}}" 
+        if (err !== "0") {
+            const erroDiv = document.getElementById('declErro');
+            erroDiv.textContent = "O user logado não possui usuário associado, entre em contato com o suporte para corrigir.";
+            erroDiv.classList.remove('d-none');
+        }
+
         // Função auxiliar para converter um elemento <img> em Base64 PNG
         function obterBase64DaImagem(imgElement) {
             try {

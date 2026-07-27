@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.pagina_inicial, name="index"),
     path("estudantes", views.pagina_estudantes, name="estudantes"),
     path('prontuario/<int:pk>/', views.pagina_prontuario, name='prontuario'),
+    path('prontuario/<int:pk>/?err=<int:err>/', views.pagina_prontuario, name='prontuario'),
     path("prontuario/", views.pagina_prontuario, name="prontuario"),
     path("prontuario", views.pagina_prontuario, name="prontuario"),
     path("validar/", views.pagina_validar_declaracao, name="validar_declaracao"),

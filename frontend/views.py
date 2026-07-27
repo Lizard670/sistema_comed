@@ -33,15 +33,13 @@ def pagina_estudantes(request):
     return render(request, "estudantes.html", {"form": form})
 
 @login_required
-def pagina_prontuario(request, pk=0):
+def pagina_prontuario(request, pk=0, err=""):
     if request.method == "POST":
         form = forms.Prontuario(request.POST)
         if form.is_valid():
             if "salvar_prontuario" in request.POST:
                 idPaciente = request.POST.get("paciente")
                 paciente = Aluno.objects.get(id=idPaciente)
-                # TODO Pegar id do user logado
-                usuario = Usuario.objects.get(id=1)
                 data = request.POST.get("data")
                 inicio = request.POST.get("inicio")
                 fim = request.POST.get("fim")
@@ -53,7 +51,6 @@ def pagina_prontuario(request, pk=0):
                     prontuario = Prontuario.objects.get(id=pk)
 
                     prontuario.aluno = paciente
-                    prontuario.usuario = usuario
                     prontuario.data = data
                     prontuario.horario_inicio = inicio
                     prontuario.horario_fim = fim 
@@ -63,14 +60,22 @@ def pagina_prontuario(request, pk=0):
                     
                     prontuario.save()
                 else:
+                    try:
+                        usuario = Usuario.objects.get(user=request.user)
+                    except Usuario.DoesNotExist as e:
+                        return redirect(reverse("prontuario", kwargs={'pk':pk, 'err':403}))
+                    
                     prontuario = Prontuario.objects.create(aluno=paciente, usuario=usuario,
                                                         data=data, horario_inicio=inicio, horario_fim=fim, 
                                                         descricao=descricao, status=status, tipo_atendimento=tipo_atendimento)
 
                 return redirect(reverse("prontuario", kwargs={'pk':prontuario.id}))
             elif "salvar_declaracao" in request.POST and pk!=0:
-                # TODO Pegar id do user logado
-                usuario = Usuario.objects.get(id=1)
+                try:
+                    usuario = Usuario.objects.get(user=request.user)
+                except Usuario.DoesNotExist as e:
+                    return redirect(reverse("prontuario", kwargs={'pk':pk, 'err':403}))
+                
                 descricao = request.POST.get("declaracao")
                 
                 if Declaracao.objects.filter(prontuario_id=pk).exists():
@@ -107,7 +112,7 @@ def pagina_prontuario(request, pk=0):
                 declaracao = Declaracao.objects.get(prontuario_id=pk)
                 initial['declaracao'] = declaracao.descricao
             except Declaracao.DoesNotExist as e:
-                print(f"- O Prontuário {pk} não possúi declaração")
+                print(f"- O Prontuário {pk} não possui declaração")
             form = forms.Prontuario(initial=initial)
             
         except Prontuario.DoesNotExist as e:
@@ -115,7 +120,7 @@ def pagina_prontuario(request, pk=0):
     else:
         form = forms.Prontuario()
 
-    return render(request, "prontuario.html", {"form": form, "pk": pk})
+    return render(request, "prontuario.html", {"form": form, "pk": pk, "err": err})
 
 def pagina_validar_declaracao(request, codigo=None):
     """Página pública para validar a autenticidade de uma declaração pelo código."""
