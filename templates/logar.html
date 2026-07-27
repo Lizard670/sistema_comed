@@ -27,9 +27,10 @@
                                     </div>
                                     <div class="row-md-10 card shadow-lg border-0 rounded-lg mt-5">
                                         <div class="card-body">
-                                            <form>
+                                            <form method="post">
                                                 {% csrf_token %}
-                                                {% crispy form form.helper %}
+                                                {{ form | crispy }}
+                                                <button type="submit" class="btn btn-primary">Entrar</button>
                                             </form>
                                         </div>
                                     </div>
