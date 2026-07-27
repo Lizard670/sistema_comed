@@ -23,7 +23,6 @@ class Login(forms.Form):
         self.helper = FormHelper
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-horizontal'
-
         self.helper.layout = Layout(
             Div(
                 'email',
@@ -138,6 +137,7 @@ class Estudante(forms.Form):
         self.helper = FormHelper
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-horizontal'
+        self.helper.form_tag = False
 
         self.helper.layout = Layout(
             Div(

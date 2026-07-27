@@ -106,7 +106,6 @@ function carregarTabelaAlunos() {
                 <td>${aluno.matricula}</td>
                 <td>${formatarData(aluno.nascimento)}</td>
             `;
-            tr.addEventListener("click", () => selecionarAluno(aluno.id, tr));
             corpo.appendChild(tr);
         });
 
@@ -130,7 +129,7 @@ function selecionarAluno(idAluno, trClicado) {
             .forEach(tr => tr.classList.remove("selecionado"));
     trClicado.classList.add("selecionado");
 
-    alunoSelecionadoId = idAluno;
+    alunoSelecionadoId = Number(idAluno);
 
     document.getElementById("nomeAlunoSelecionado").textContent = alunos[idAluno].nome;
     document.getElementById("secaoHistorico").classList.remove("oculto");
@@ -157,13 +156,19 @@ function preencherFormAluno(idAluno) {
     // Busca dados completos do aluno (AlunoDetailSerializer retorna __all__)
     return buscarAlunoDetalhado(idAluno)
         .then(aluno => {
+            // Se o usuário clicou em outra linha enquanto a requisição estava
+            // em andamento, a resposta antiga não pode sobrescrever o formulário.
+            if (Number(aluno.id) !== Number(idAluno) || Number(alunoSelecionadoId) !== Number(idAluno)) {
+                return;
+            }
+
             // "Aluno" e "Turma" sao ModelChoiceField — Django gera <select> cujo valor e o id
             const campoNome = document.getElementById("id_nome");
             if (campoNome) campoNome.value = aluno.id;
 
-            // Data: converte YYYY-MM-DD para DD/MM/AAAA
+            // O campo crispy é do tipo date e precisa receber ISO (YYYY-MM-DD).
             const campoData = document.getElementById("id_data");
-            if (campoData) campoData.value = dataParaExibicao(aluno.nascimento);
+            if (campoData) campoData.value = aluno.nascimento || "";
 
             const campoTipo = document.getElementById("id_tipo");
             if (campoTipo) campoTipo.value = aluno.tipo_sanguineo || "";
@@ -399,18 +404,83 @@ function registrarEventosEditar() {
     });
 }
 
+// ─── Ações do histórico e formulário crispy ──────────────────────────────────
+
+function mostrarMensagemSalvar(texto, tipo) {
+    const mensagem = document.getElementById("mensagemSalvarAluno");
+    mensagem.textContent = texto;
+    mensagem.className = `alert alert-${tipo}`;
+}
+
+function registrarEventosFormularioAluno() {
+    document.getElementById("formDadosAluno").addEventListener("submit", evento => {
+        evento.preventDefault();
+
+        if (!alunoSelecionadoId) {
+            mostrarMensagemSalvar("Selecione um aluno antes de salvar as alterações.", "warning");
+            return;
+        }
+
+        const payload = {
+            nascimento:       document.getElementById("id_data").value || null,
+            tipo_sanguineo:   document.getElementById("id_tipo").value || null,
+            peso:             document.getElementById("id_peso").value || null,
+            nome_responsavel: document.getElementById("id_mae").value.trim(),
+            altura:           document.getElementById("id_altura").value || null,
+            matricula:        document.getElementById("id_matricula").value.trim(),
+            turma:            parseInt(document.getElementById("id_turma").value),
+            observacoes:      document.getElementById("id_descricao").value.trim() || null,
+            restricoes:       document.getElementById("id_restricoes").value.trim() || null,
+            medicamentos:     document.getElementById("id_medicamentos").value.trim() || null,
+        };
+
+        if (!payload.nascimento || !payload.nome_responsavel || !payload.matricula || !payload.turma) {
+            mostrarMensagemSalvar("Preencha data de nascimento, responsável, matrícula e turma antes de salvar.", "warning");
+            return;
+        }
+
+        fetch(urlApiAlunos + alunoSelecionadoId + "/", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+            body: JSON.stringify(payload)
+        })
+        .then(r => {
+            if (!r.ok) return r.json().then(erro => { throw erro; });
+            return r.json();
+        })
+        .then(alunoAtualizado => {
+            alunos[alunoSelecionadoId] = alunoAtualizado;
+            mostrarMensagemSalvar("Dados do aluno salvos com sucesso.", "success");
+            carregarTabelaAlunos();
+        })
+        .catch(erro => {
+            console.error("Erro ao salvar dados do aluno:", erro);
+            const detalhes = erro.detail || Object.entries(erro)
+                .map(([campo, mensagens]) => `${campo}: ${[].concat(mensagens).join(", ")}`).join(" | ");
+            mostrarMensagemSalvar(`Não foi possível salvar: ${detalhes}`, "danger");
+        });
+    });
+}
+
 // ─── Inicialização ────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Aplica máscara DD/MM/AAAA nos campos de data dos dois modais e do form crispy
+    // Os campos dos modais usam texto; o formulário crispy usa um input date.
     aplicarMascaraData(document.getElementById("novoNascimento"));
     aplicarMascaraData(document.getElementById("editNascimento"));
-    if (document.getElementById("id_data")) {
-        aplicarMascaraData(document.getElementById("id_data"));
-    }
 
     iniciarCalendario();
     carregarTabelaAlunos();
+
+    // O DataTable pode ordenar e paginar as linhas. Lemos o ID da linha que
+    // está realmente visível/clicada para carregar exatamente aquele aluno.
+    document.getElementById("corpoTabelaEstudantes").addEventListener("click", evento => {
+        const linha = evento.target.closest("tr[data-aluno-id]");
+        if (!linha) return;
+        selecionarAluno(Number(linha.dataset.alunoId), linha);
+    });
+
     registrarEventosModal();
     registrarEventosEditar();
+    registrarEventosFormularioAluno();
 });

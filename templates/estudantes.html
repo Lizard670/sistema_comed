@@ -181,10 +181,9 @@
                         <div class="secao-historico mb-4 oculto" id="secaoHistorico">
                             <div class="historico-header">
                                 <span id="nomeAlunoSelecionado">—</span>
-                                <!-- TODO: "Adicionar novo prontuário" depende de quem está fazendo prontuario.html -->
-                                <button type="button" class="btn btn-adicionar-prontuario">
+                                <a href="/prontuario" class="btn btn-adicionar-prontuario" id="btnAdicionarProntuario">
                                     Adicionar novo prontuário
-                                </button>
+                                </a>
                             </div>
 
                             <div class="row">
@@ -219,8 +218,8 @@
                             </div>
                         </div>
 
-                        <!-- Formulário crispy (mantido como estava) -->
-                        <form action="/prontuario" method="post">
+                        <div id="mensagemSalvarAluno" class="alert d-none" role="alert"></div>
+                        <form id="formDadosAluno" method="post">
                             {% csrf_token %}
                             {% crispy form form.helper %}
                         </form>
