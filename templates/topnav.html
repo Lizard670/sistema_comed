@@ -17,7 +17,14 @@
             <li><a class="dropdown-item" href="#!">Configurações</a></li>
             <li><a class="dropdown-item" href="#!">Histórico de atividades</a></li>
             <li><hr class="dropdown-divider" /></li>
-            <li><a class="dropdown-item" href="#!">Desconectar</a></li>
+            <li>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <div class="row justify-content-center">
+                        <button type="submit" class="btn btn-inverse btn-danger col-10">Desconectar</button>
+                    </div>
+                </form>
+            </li>
         </ul>
     </li>
 </ul>

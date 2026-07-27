@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.timezone import now
+import uuid
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -123,20 +124,20 @@ class Prontuario(BaseModel):
         db_table = "prontuario"
         verbose_name = "Prontuário"
         verbose_name_plural = "Prontuários"
-        ordering = ["-updated_at"]
+        ordering = ["-data"]
         
     def __str__(self):
         return f"Prontuário #{self.id}"
 
 class Declaracao(BaseModel):
-    codigo = models.CharField(help_text="Código da Declaracão", max_length=50, unique=True, db_index=True, blank=False, null=False)
-    
+    codigo = models.UUIDField(default=uuid.uuid4, editable=False, help_text="Código da Declaracão", unique=True, blank=False, null=False)
+
     descricao = models.TextField(help_text="Descrição da Declaracão", blank=False, null=False)
     observacoes_internas = models.TextField(help_text="Observações próprias do(a) responsável pela declaracão", blank=True, null=True)
     
     prontuario = models.OneToOneField(Prontuario, on_delete=models.PROTECT, primary_key=True, related_name="declaracoes", blank=False, null=False)
     emitido_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, related_name="declaracoes_emitidas", null=True)
-    data_horario_emissao = models.DateTimeField(auto_now_add=True)
+    data_horario_emissao = models.DateTimeField(auto_now_add=True)  
     
     class Meta(BaseModel.Meta):
         db_table = "declaracao"
