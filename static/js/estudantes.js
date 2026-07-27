@@ -83,6 +83,9 @@ function carregarTabelaAlunos() {
         fetch(urlApiAlunos).then(r => r.json())
     ])
     .then(([dadosCursos, dadosTurmas, dadosAlunos]) => {
+        cursos = {};
+        turmas = {};
+        alunos = {};
         dadosCursos.forEach(c => { cursos[c.id] = c; });
         dadosTurmas.forEach(t => { turmas[t.id] = t; });
         dadosAlunos.forEach(a => { alunos[a.id] = a; });
@@ -138,10 +141,21 @@ function selecionarAluno(idAluno, trClicado) {
     preencherFormAluno(idAluno);
 }
 
+function buscarAlunoDetalhado(idAluno) {
+    return fetch("/api/aluno/" + idAluno + "/")
+        .then(r => {
+            if (!r.ok) throw new Error(`Erro ${r.status} ao buscar aluno`);
+            return r.json();
+        })
+        .then(aluno => {
+            alunos[idAluno] = aluno;
+            return aluno;
+        });
+}
+
 function preencherFormAluno(idAluno) {
     // Busca dados completos do aluno (AlunoDetailSerializer retorna __all__)
-    fetch("/api/aluno/" + idAluno + "/")
-        .then(r => r.json())
+    return buscarAlunoDetalhado(idAluno)
         .then(aluno => {
             // "Aluno" e "Turma" sao ModelChoiceField — Django gera <select> cujo valor e o id
             const campoNome = document.getElementById("id_nome");
@@ -226,10 +240,15 @@ function carregarHistorico(idAluno) {
 // ─── Preenche select de turmas com "Turma · Curso" ───────────────────────────
 
 function preencherSelectTurmas(selectId, turmaSelecionadaId) {
-    fetch(urlApiTurmas)
-        .then(r => r.json())
+    const select = document.getElementById(selectId);
+    select.innerHTML = '<option value="">Carregando...</option>';
+
+    return fetch(urlApiTurmas)
+        .then(r => {
+            if (!r.ok) throw new Error(`Erro ${r.status} ao carregar turmas`);
+            return r.json();
+        })
         .then(dados => {
-            const select = document.getElementById(selectId);
             select.innerHTML = '<option value="">Selecione a turma</option>';
             dados.forEach(t => {
                 const opt       = document.createElement("option");
@@ -237,9 +256,13 @@ function preencherSelectTurmas(selectId, turmaSelecionadaId) {
                 // Mostra "ALM1A · Alimentos" se o curso existir, senão só "ALM1A"
                 const nomeCurso = cursos[t.curso] ? cursos[t.curso].nome : "";
                 opt.textContent = nomeCurso ? `${t.nome} · ${nomeCurso}` : t.nome;
-                if (t.id === turmaSelecionadaId) opt.selected = true;
+                if (String(t.id) === String(turmaSelecionadaId)) opt.selected = true;
                 select.appendChild(opt);
             });
+        })
+        .catch(erro => {
+            console.error("Erro ao carregar turmas:", erro);
+            select.innerHTML = '<option value="">Não foi possível carregar as turmas</option>';
         });
 }
 
@@ -305,22 +328,24 @@ function registrarEventosModal() {
 
 function registrarEventosEditar() {
     document.getElementById("modalEditarAluno").addEventListener("show.bs.modal", () => {
-        const aluno = alunos[alunoSelecionadoId];
-        if (!aluno) return;
+        if (!alunoSelecionadoId) return;
 
-        document.getElementById("editNome").value         = aluno.nome || "";
-        document.getElementById("editMatricula").value    = aluno.matricula || "";
-        // Converte YYYY-MM-DD para DD/MM/AAAA para exibir no campo com máscara
-        document.getElementById("editNascimento").value   = dataParaExibicao(aluno.nascimento);
-        document.getElementById("editResponsavel").value  = aluno.nome_responsavel || "";
-        document.getElementById("editTipoSanguineo").value = aluno.tipo_sanguineo || "";
-        document.getElementById("editPeso").value         = aluno.peso || "";
-        document.getElementById("editAltura").value       = aluno.altura || "";
-        document.getElementById("editMedicamentos").value = aluno.medicamentos || "";
-        document.getElementById("editRestricoes").value   = aluno.restricoes || "";
-        document.getElementById("editObservacoes").value  = aluno.observacoes || "";
+        buscarAlunoDetalhado(alunoSelecionadoId)
+            .then(aluno => {
+                document.getElementById("editNome").value         = aluno.nome || "";
+                document.getElementById("editMatricula").value    = aluno.matricula || "";
+                document.getElementById("editNascimento").value   = dataParaExibicao(aluno.nascimento);
+                document.getElementById("editResponsavel").value  = aluno.nome_responsavel || "";
+                document.getElementById("editTipoSanguineo").value = aluno.tipo_sanguineo || "";
+                document.getElementById("editPeso").value         = aluno.peso || "";
+                document.getElementById("editAltura").value       = aluno.altura || "";
+                document.getElementById("editMedicamentos").value = aluno.medicamentos || "";
+                document.getElementById("editRestricoes").value   = aluno.restricoes || "";
+                document.getElementById("editObservacoes").value  = aluno.observacoes || "";
 
-        preencherSelectTurmas("editTurma", aluno.turma);
+                return preencherSelectTurmas("editTurma", aluno.turma);
+            })
+            .catch(erro => console.error("Erro ao preparar edição do aluno:", erro));
     });
 
     document.getElementById("btnSalvarEdicao").addEventListener("click", () => {
