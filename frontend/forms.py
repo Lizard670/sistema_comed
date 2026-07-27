@@ -8,39 +8,6 @@ from crispy_forms.layout import Layout, Button, Div, HTML, Reset, Submit, Field
 
 
 
-class Login(forms.Form):
-    email = forms.EmailField(label="Endereço de email",
-                             widget=forms.EmailInput())
-    senha = forms.CharField(label="senha",
-                            widget=forms.PasswordInput())
-    lembrar = forms.BooleanField(label="Manter conectado",
-                                 widget=forms.CheckboxInput,
-                                 required=False)
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.helper = FormHelper
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'form-horizontal'
-
-        self.helper.layout = Layout(
-            Div(
-                'email',
-            css_class="form-floating mb-3"),
-            Div(
-                'senha',
-            css_class="form-floating mb-3"),
-            Div( 
-                'lembrar',
-            css_class="form-check mb-3"),
-            Div( 
-                HTML("<a class=\"small\" href=\"{% url 'resetar_senha' %}\">Esqueci a senha</a>"),
-                Submit('login', 'Entrar', css_class='btn btn-primary'),
-            css_class="d-flex align-items-center justify-content-between mt-4 mb-0"),
-        )
-
-
 class Prontuario(forms.Form):
     paciente = forms.ModelChoiceField(label="Paciente", 
                                       queryset=Aluno.objects.all())
