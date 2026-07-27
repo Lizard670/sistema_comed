@@ -120,6 +120,13 @@
             .form-select, .datatable-selector {
                 background-image: none;
             }
+            .bolha-calendario {
+                margin: auto;
+                background-color: #1DA5FF;
+                border-radius: 50%;
+                width: 5px;
+                height: 5px;
+            }
         </style>
     </head>
     <body class="sb-nav-fixed">
@@ -211,7 +218,19 @@
                                 <div class="col-md-6">
                                     <div class="card mb-4">
                                         <div class="card-body">
-                                            <div id="calendario"></div>
+                                            <div class="calendario"></div>
+
+                                            <div class="modal fade" id="modalProntuariosDia" tabindex="-1" aria-labelledby="modalProntuariosDiaLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalProntuariosDiaLabel">Prontuários</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                                        </div>
+                                                        <div class="modal-body"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -387,6 +406,7 @@
             var urlApiCursos    = "{% url 'api-cursos-list' %}";
             var urlApiTurmas    = "{% url 'api-turmas-list' %}";
             var urlAlunoProntuarios = "/api/aluno/ID_ALUNO/prontuarios/";
+            var urlProntuarioDetalhe = "{% url 'prontuario-detalhe' pk=670670 %}";
         </script>
 
         <script src="{% static 'js/estudantes.js'%}"></script>

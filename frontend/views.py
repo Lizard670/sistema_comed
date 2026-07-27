@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
+from core.models import Prontuario
 
 from . import forms 
 
@@ -37,7 +38,9 @@ def pagina_estudantes(request):
 
     return render(request, "estudantes.html", {"form": form})
 
-def pagina_prontuario(request):
+def pagina_prontuario(request, pk=None):
+    prontuario = get_object_or_404(Prontuario, pk=pk) if pk is not None else None
+
     if request.method == "POST":
         print(request)
         form = forms.Prontuario(request.POST)
@@ -46,6 +49,15 @@ def pagina_prontuario(request):
             pass
 
     else:
-        form = forms.Prontuario()
+        valores_iniciais = {}
+        if prontuario:
+            valores_iniciais = {
+                "paciente": prontuario.aluno_id,
+                "data": prontuario.data,
+                "inicio": prontuario.horario_inicio,
+                "fim": prontuario.horario_fim,
+                "descricao": prontuario.descricao,
+            }
+        form = forms.Prontuario(initial=valores_iniciais)
 
-    return render(request, "prontuario.html", {"form": form})
+    return render(request, "prontuario.html", {"form": form, "prontuario": prontuario})

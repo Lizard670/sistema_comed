@@ -8,4 +8,5 @@ urlpatterns = [
     path("resetar_senha", views.pagina_resetar_senha, name="resetar_senha"),
     path("estudantes", views.pagina_estudantes, name="estudantes"),
     path("prontuario", views.pagina_prontuario, name="prontuario"),
+    path("prontuario/<int:pk>/", views.pagina_prontuario, name="prontuario-detalhe"),
 ]

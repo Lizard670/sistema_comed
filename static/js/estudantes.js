@@ -55,22 +55,67 @@ var alunos           = {};  // id -> objeto aluno
 var calendario       = null;
 var tabelaSimple     = null;
 var alunoSelecionadoId = null;
+var prontuariosCalendario = {};
 
 // ─── Calendário ───────────────────────────────────────────────────────────────
 
 function iniciarCalendario() {
-    calendario = new Calendar("#calendario", { language: "pt", displayHeader: true });
-    calendario.setNumberMonthsDisplayed(1);
+    calendario = new Calendar(".calendario");
+    calendario.setNumberMonthsDisplayed(2);
+    calendario.setLanguage("pt");
+    calendario.setCustomDayRenderer(renderizarDiaCalendario);
+
+    const modalProntuariosDia = document.getElementById("modalProntuariosDia");
+    modalProntuariosDia.addEventListener("show.bs.modal", evento => {
+        const data = evento.relatedTarget.dataset.date;
+        const [ano, mes, dia] = data.split("-");
+        const prontuarios = (((prontuariosCalendario[ano] || {})[mes] || {})[dia] || []);
+        const corpoModal = modalProntuariosDia.querySelector(".modal-body");
+
+        corpoModal.innerHTML = "";
+        prontuarios.forEach(prontuario => {
+            const item = document.createElement("a");
+            item.className = "d-block mb-2";
+            item.href = urlProntuarioDetalhe.replace("670670", prontuario.id);
+            item.textContent = `${formatarData(prontuario.data)} — ${labelTipo(prontuario.tipo_atendimento)} (${labelStatus(prontuario.status)})`;
+            corpoModal.appendChild(item);
+        });
+    });
 }
 
 function atualizarCalendario(prontuarios) {
-    const eventos = prontuarios.map(p => ({
-        startDate: new Date(p.data + "T12:00:00"),
-        endDate:   new Date(p.data + "T12:00:00"),
-        color:     "#187D75",
-        name:      labelTipo(p.tipo_atendimento)
-    }));
-    calendario.setDataSource(eventos);
+    prontuariosCalendario = {};
+
+    prontuarios.forEach(prontuario => {
+        const [ano, mes, dia] = prontuario.data.split("-");
+        if (!prontuariosCalendario[ano]) prontuariosCalendario[ano] = {};
+        if (!prontuariosCalendario[ano][mes]) prontuariosCalendario[ano][mes] = {};
+        if (!prontuariosCalendario[ano][mes][dia]) prontuariosCalendario[ano][mes][dia] = [];
+        prontuariosCalendario[ano][mes][dia].push(prontuario);
+    });
+
+    // Exibe inicialmente o mês do primeiro prontuário retornado no histórico.
+    if (prontuarios.length > 0) {
+        const [ano, mes] = prontuarios[0].data.split("-").map(Number);
+        calendario.setStartDate(new Date(ano, mes - 1, 1));
+    }
+
+    calendario.render();
+}
+
+function renderizarDiaCalendario(elemento, dataAtual) {
+    const ano = String(dataAtual.getFullYear());
+    const mes = String(dataAtual.getMonth() + 1).padStart(2, "0");
+    const dia = String(dataAtual.getDate()).padStart(2, "0");
+
+    if (!(((prontuariosCalendario[ano] || {})[mes] || {})[dia])) return;
+
+    const bolha = document.createElement("div");
+    bolha.classList.add("bolha-calendario");
+    elemento.setAttribute("data-bs-toggle", "modal");
+    elemento.setAttribute("data-bs-target", "#modalProntuariosDia");
+    elemento.dataset.date = `${ano}-${mes}-${dia}`;
+    elemento.appendChild(bolha);
 }
 
 // ─── Tabela de Alunos ─────────────────────────────────────────────────────────
@@ -225,13 +270,13 @@ function carregarHistorico(idAluno) {
 
             prontuarios.forEach(p => {
                 const tr = document.createElement("tr");
+                const urlProntuario = urlProntuarioDetalhe.replace("670670", p.id);
                 tr.innerHTML = `
                     <td>${formatarData(p.data)}</td>
                     <td>${labelTipo(p.tipo_atendimento)}</td>
                     <td>${labelStatus(p.status)}</td>
                     <td>
-                        <!-- TODO: link para prontuario.html depende de quem está fazendo aquela página -->
-                        <button class="btn btn-visualizar">Visualizar</button>
+                        <a href="${urlProntuario}" class="btn btn-visualizar">Visualizar</a>
                     </td>
                 `;
                 corpo.appendChild(tr);

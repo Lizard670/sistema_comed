@@ -59,7 +59,7 @@ class AlunoDetailSerializer(serializers.ModelSerializer):
 class ProntuarioListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prontuario
-        fields = ["id", "aluno", "usuario", "data", "status"]
+        fields = ["id", "aluno", "usuario", "data", "tipo_atendimento", "status"]
 
 class ProntuarioDetailSerializer(serializers.ModelSerializer):
     class Meta:

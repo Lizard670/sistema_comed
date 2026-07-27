@@ -45,7 +45,11 @@ class Prontuario(forms.Form):
                                       queryset=Aluno.objects.all())
     data = forms.DateField(label="Data da consulta", 
                            initial=date.today, 
-                           widget=forms.DateInput(attrs={'type': 'date'}))
+                           input_formats=["%Y-%m-%d"],
+                           widget=forms.DateInput(
+                               format="%Y-%m-%d",
+                               attrs={'type': 'date'}
+                           ))
     
     inicio = forms.TimeField(label="Horário início", 
                              widget=forms.TimeInput(attrs={'type': 'time'}))
