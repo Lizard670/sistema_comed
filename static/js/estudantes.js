@@ -135,6 +135,53 @@ function selecionarAluno(idAluno, trClicado) {
     document.getElementById("btnAbrirEditar").disabled = false;
 
     carregarHistorico(idAluno);
+    preencherFormAluno(idAluno);
+}
+
+function preencherFormAluno(idAluno) {
+    // Busca dados completos do aluno (AlunoDetailSerializer retorna __all__)
+    fetch("/api/aluno/" + idAluno + "/")
+        .then(r => r.json())
+        .then(aluno => {
+            // "Aluno" e "Turma" sao ModelChoiceField — Django gera <select> cujo valor e o id
+            const campoNome = document.getElementById("id_nome");
+            if (campoNome) campoNome.value = aluno.id;
+
+            // Data: converte YYYY-MM-DD para DD/MM/AAAA
+            const campoData = document.getElementById("id_data");
+            if (campoData) campoData.value = dataParaExibicao(aluno.nascimento);
+
+            const campoTipo = document.getElementById("id_tipo");
+            if (campoTipo) campoTipo.value = aluno.tipo_sanguineo || "";
+
+            const campoPeso = document.getElementById("id_peso");
+            if (campoPeso) campoPeso.value = aluno.peso || "";
+
+            const campoMae = document.getElementById("id_mae");
+            if (campoMae) campoMae.value = aluno.nome_responsavel || "";
+
+            const campoAltura = document.getElementById("id_altura");
+            if (campoAltura) campoAltura.value = aluno.altura || "";
+
+            const campoMatricula = document.getElementById("id_matricula");
+            if (campoMatricula) campoMatricula.value = aluno.matricula || "";
+
+            const campoTurma = document.getElementById("id_turma");
+            if (campoTurma) campoTurma.value = aluno.turma || "";
+
+            const campoDescricao = document.getElementById("id_descricao");
+            if (campoDescricao) campoDescricao.value = aluno.observacoes || "";
+
+            const campoRestricoes = document.getElementById("id_restricoes");
+            if (campoRestricoes) campoRestricoes.value = aluno.restricoes || "";
+
+            const campoMedicamentos = document.getElementById("id_medicamentos");
+            if (campoMedicamentos) campoMedicamentos.value = aluno.medicamentos || "";
+
+            // Rola ate o form para o usuario ver que foi preenchido
+            if (campoNome) campoNome.scrollIntoView({ behavior: "smooth", block: "center" });
+        })
+        .catch(err => console.error("Erro ao buscar detalhes do aluno:", err));
 }
 
 // ─── Histórico de prontuários ─────────────────────────────────────────────────
@@ -330,9 +377,12 @@ function registrarEventosEditar() {
 // ─── Inicialização ────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Aplica máscara DD/MM/AAAA nos campos de data dos dois modais
+    // Aplica máscara DD/MM/AAAA nos campos de data dos dois modais e do form crispy
     aplicarMascaraData(document.getElementById("novoNascimento"));
     aplicarMascaraData(document.getElementById("editNascimento"));
+    if (document.getElementById("id_data")) {
+        aplicarMascaraData(document.getElementById("id_data"));
+    }
 
     iniciarCalendario();
     carregarTabelaAlunos();

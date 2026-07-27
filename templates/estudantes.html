@@ -220,7 +220,7 @@
                         </div>
 
                         <!-- Formulário crispy (mantido como estava) -->
-                        <form action="/prontuario/" method="post">
+                        <form action="/prontuario" method="post">
                             {% csrf_token %}
                             {% crispy form form.helper %}
                         </form>
