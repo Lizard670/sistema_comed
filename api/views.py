@@ -137,13 +137,28 @@ class ValidarDeclaracaoView(APIView):
     Rota pública para validar a autenticidade de um atestado pelo código único.
     Não requer autenticação — qualquer pessoa pode confirmar se o atestado é legítimo.
 
-    Retorna apenas se o código é válido ou não, sem expor dados internos da declaração.
+    Retorna a validade e os dados que constam na declaração: matrícula, data e
+    horários de entrada e saída do atendimento.
     Exemplo: GET /api/validar/CoMed-23A231CF5923E874AABBCCDD11223344/
     """
     permission_classes = [AllowAny]
 
     def get(self, request, codigo):
-        existe = Declaracao.objects.filter(codigo=codigo).exists()
-        if existe:
-            return Response({"valido": True}, status=status.HTTP_200_OK)
+        declaracao = (
+            Declaracao.objects.select_related("prontuario__aluno")
+            .filter(codigo=codigo)
+            .first()
+        )
+        if declaracao:
+            prontuario = declaracao.prontuario
+            return Response(
+                {
+                    "valido": True,
+                    "matricula": prontuario.aluno.matricula,
+                    "data_atendimento": prontuario.data.isoformat(),
+                    "horario_entrada": prontuario.horario_inicio.strftime("%H:%M"),
+                    "horario_saida": prontuario.horario_fim.strftime("%H:%M"),
+                },
+                status=status.HTTP_200_OK,
+            )
         return Response({"valido": False}, status=status.HTTP_404_NOT_FOUND)
