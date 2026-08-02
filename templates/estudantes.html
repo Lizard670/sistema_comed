@@ -174,6 +174,10 @@
                                             data-bs-toggle="modal" data-bs-target="#modalAdicionarAluno">
                                         <i class="fas fa-plus me-1"></i> Adicionar
                                     </button>
+                                    <button type="button" class="btn btn-outline-success"
+                                            data-bs-toggle="modal" data-bs-target="#modalAdicionarCursoTurma">
+                                        <i class="fas fa-plus me-1"></i> Adicionar curso/turma
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -390,6 +394,40 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-success" id="btnSalvarAluno">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Adicionar Curso/Turma -->
+        <div class="modal fade" id="modalAdicionarCursoTurma" tabindex="-1" aria-labelledby="modalAdicionarCursoTurmaLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color:#187D75; color:white;">
+                        <h5 class="modal-title" id="modalAdicionarCursoTurmaLabel">Adicionar curso/turma</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">Escolha um curso existente ou informe o nome de um novo curso.</p>
+                        <div class="mb-3">
+                            <label class="form-label" for="cursoExistente">Curso existente</label>
+                            <select class="form-select" id="cursoExistente">
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="novoCurso">Novo curso</label>
+                            <input type="text" class="form-control" id="novoCurso" maxlength="30" placeholder="Preencha somente se for um novo curso">
+                        </div>
+                        <div>
+                            <label class="form-label" for="novaTurma">Turma <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="novaTurma" maxlength="5" placeholder="Ex.: INF1A">
+                        </div>
+                        <p id="erroAdicionarCursoTurma" style="display:none;" class="text-danger mt-3"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success" id="btnSalvarCursoTurma">Salvar</button>
                     </div>
                 </div>
             </div>
