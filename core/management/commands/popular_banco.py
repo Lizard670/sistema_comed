@@ -43,12 +43,28 @@ class Command(BaseCommand):
 
         # Criar Turmas
         turmas = []
-        turmas_nomes = ["INF1A", "INF2A", "INF3A", "ALM1A", "ALM2A", "BIO1A"]
+        turmas_nomes = [
+            ('TIA1'),
+            ('TIB1'),
+            ('TAA1'),
+            ('TAB1'),
+            ('TBA1'),
+            ('TBB1'),
+            ('TI2'),
+            ('TA2'),
+            ('TB2'),
+            ('TI3'),
+            ('TA3'),
+            ('TB3'),
+            ('TI4'),
+            ('TA4'),
+            ('TB4')
+        ]
         for nome_turma in turmas_nomes:
             # Associa os de Informática aos primeiros, Alimentos aos do meio, etc.
-            if nome_turma.startswith("INF"):
+            if nome_turma.startswith("TI"):
                 curso = cursos[0]
-            elif nome_turma.startswith("ALM"):
+            elif nome_turma.startswith("TA"):
                 curso = cursos[1]
             else:
                 curso = cursos[2]
@@ -58,16 +74,40 @@ class Command(BaseCommand):
 
         # Criar Alunos
         alunos_data = [
-            ("Lucas Matheus Ferreira", "202319830001", "Maria Ferreira", "INF3A"),
-            ("Maciel Souza Santos", "202319830012", "João Souza Santos", "INF3A"),
-            ("Rafael Augusto Lima Costa", "202419820734", "Helena Lima Costa", "BIO1A"),
-            ("Camila Beatriz Rocha Alves", "202519831456", "Cláudia Rocha Alves", "ALM1A"),
-            ("Mariana Júlia Fernandes Dias", "202419821234", "Aline Fernandes Dias", "BIO1A"),
-            ("Gabriel Henrique Martins Ribeiro", "202319832567", "Marcos Martins Ribeiro", "ALM2A"),
+            ('20261981001', 'João Victor Santos Silva',  'Maria Aparecida Silva', 'TIA1'),
+            ('20261981002', 'Ana Clara Oliveira Souza',  'José Carlos Oliveira',  'TIA1'),
+            ('20261981003', 'Lucas Gabriel Almeida',     'Patrícia Almeida',      'TIB1'),
+            ('20261981004', 'Mariana Costa Rodrigues',   'Fernanda Costa',        'TIB1'),
+            ('20261982005', 'Rafael Henrique Pereira',   'Carla Pereira',         'TAA1'),
+            ('20261982006', 'Isabela Martins Lima',      'Roberto Martins',       'TAA1'),
+            ('20261982007', 'Gabriel Fernandes Rocha',   'Ana Fernandes',         'TAB1'),
+            ('20261982008', 'Beatriz Santos Oliveira',   'Paulo Santos',          'TAB1'),
+            ('20261983009', 'Thiago Henrique Costa',     'Cláudia Costa',         'TBA1'),
+            ('20261983010', 'Larissa Beatriz Alves',     'Marcos Alves',          'TBA1'),
+            ('20261983011', 'Bruno Miguel Souza',        'Renata Souza',          'TBB1'),
+            ('20261983012', 'Camila Rodrigues Pereira',  'Ricardo Pereira',       'TBB1'),
+            ('20251981013', 'Pedro Lucas Fernandes',     'Sônia Fernandes',       'TI2'),
+            ('20251981014', 'Julia Mendes Silva',        'André Mendes',          'TI2'),
+            ('20251982015', 'Felipe Augusto Costa',      'Tatiana Costa',         'TA2'),
+            ('20251982016', 'Nicole Santos Lima',        'Eduardo Santos',        'TA2'),
+            ('20251983017', 'Matheus Vinicius Souza',    'Marisa Souza',          'TB2'),
+            ('20251983018', 'Gabriela Ferreira Costa',   'Antônio Ferreira',      'TB2'),
+            ('20241981019', 'Enzo Gabriel Oliveira',     'Sandra Oliveira',       'TI3'),
+            ('20241981020', 'Valentina Santos Silva',    'Fábio Silva',           'TI3'),
+            ('20241982021', 'Arthur Henrique Pereira',   'Lúcia Pereira',         'TA3'),
+            ('20241982022', 'Helena Martins Rocha',      'Ricardo Martins',       'TA3'),
+            ('20241983023', 'Theo Miguel Alves',         'Cristina Alves',        'TB3'),
+            ('20241983024', 'Laura Beatriz Costa',       'Roberto Costa',         'TB3'),
+            ('20231981025', 'Davi Lucas Santos',         'Patrícia Santos',       'TI4'),
+            ('20231981026', 'Sophia Fernandes Oliveira', 'André Oliveira',        'TI4'),
+            ('20231982027', 'Bernardo Henrique Silva',   'Márcia Silva',          'TA4'),
+            ('20231982028', 'Manuela Rodrigues Pereira', 'Paulo Pereira',         'TA4'),
+            ('20231983029', 'Noah Miguel Souza',         'Renata Souza',          'TB4'),
+            ('20231983030', 'Alice Santos Lima',         'Marcos Lima',           'TB4'),
         ]
 
         alunos = []
-        for nome, matricula, responsavel, nome_turma in alunos_data:
+        for matricula, nome, responsavel, nome_turma in alunos_data:
             turma_obj = next(t for t in turmas if t.nome == nome_turma)
             aluno_obj, _ = Aluno.objects.get_or_create(
                 matricula=matricula,
@@ -96,8 +136,8 @@ class Command(BaseCommand):
         # Gera pelo menos 1 prontuário para cada aluno para podermos testar com qualquer um
         for i, aluno in enumerate(alunos):
             # Garante até 2 prontuários por aluno
-            for k in range(random.randint(1, 2)):
-                data_atendimento = datetime.date.today() - datetime.timedelta(days=random.randint(0, 30))
+            for k in range(random.randint(1, 4)):
+                data_atendimento = datetime.date.today() - datetime.timedelta(days=random.randint(0, 180))
                 Prontuario.objects.get_or_create(
                     aluno=aluno,
                     data=data_atendimento,
