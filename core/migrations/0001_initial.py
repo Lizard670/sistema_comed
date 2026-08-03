@@ -129,7 +129,6 @@ class Migration(migrations.Migration):
                 ('deleted_at', models.DateTimeField(blank=True, null=True)),
                 ('codigo', models.UUIDField(default=uuid.uuid4, editable=False, help_text='Código da Declaracão', unique=True)),
                 ('descricao', models.TextField(help_text='Descrição da Declaracão')),
-                ('observacoes_internas', models.TextField(blank=True, help_text='Observações próprias do(a) responsável pela declaracão', null=True)),
                 ('prontuario', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, primary_key=True, related_name='declaracoes', serialize=False, to='core.prontuario')),
                 ('data_horario_emissao', models.DateTimeField(auto_now_add=True)),
                 ('emitido_por', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='declaracoes_emitidas', to='core.usuario')),

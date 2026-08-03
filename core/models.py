@@ -135,7 +135,6 @@ class Declaracao(BaseModel):
     codigo = models.UUIDField(default=uuid.uuid4, editable=False, help_text="Código da Declaracão", unique=True, blank=False, null=False)
 
     descricao = models.TextField(help_text="Descrição da Declaracão", blank=False, null=False)
-    observacoes_internas = models.TextField(help_text="Observações próprias do(a) responsável pela declaracão", blank=True, null=True)
     
     prontuario = models.OneToOneField(Prontuario, on_delete=models.PROTECT, primary_key=True, related_name="declaracoes", blank=False, null=False)
     emitido_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, related_name="declaracoes_emitidas", null=True)
