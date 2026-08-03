@@ -170,21 +170,25 @@ class ValidarDeclaracaoTests(TestCase):
         _, _, aluno = criar_estrutura_base()
         user, usuario, prontuario = criar_usuario_e_prontuario(aluno)
         self.declaracao = Declaracao.objects.create(
-            codigo="COMED-ABCD1234EFGH5678IJKL9012MNOP",
+            codigo="a1111111-2222-3333-4444-555555555555",
             descricao="Declaração de teste.",
             prontuario=prontuario,
             emitido_por=usuario,
         )
 
     def test_validacao_por_codigo_existente(self):
-        """Deve retornar 200 com {"valido": true} para um código válido."""
+        """Deve retornar os dados públicos da declaração para um código válido."""
         resp = self.client.get(f"/api/validar/{self.declaracao.codigo}/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(resp.data["valido"])
+        self.assertEqual(resp.data["matricula"], "202300001")
+        self.assertEqual(resp.data["data_atendimento"], "2026-06-28")
+        self.assertEqual(resp.data["horario_entrada"], "09:00")
+        self.assertEqual(resp.data["horario_saida"], "09:30")
 
     def test_validacao_por_codigo_inexistente_retorna_404(self):
         """Código inválido deve retornar 404 com {"valido": false}."""
-        resp = self.client.get("/api/validar/COMED-NAOEXISTE0000000000000000/")
+        resp = self.client.get("/api/validar/b1111111-2222-3333-4444-555555555555/")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         self.assertFalse(resp.data["valido"])
 
@@ -195,9 +199,12 @@ class ValidarDeclaracaoTests(TestCase):
         resp = cliente_anonimo.get(f"/api/validar/{self.declaracao.codigo}/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    def test_validacao_nao_expoe_dados_da_declaracao(self):
-        """A resposta de validação deve conter apenas o campo 'valido', sem dados internos."""
+    def test_validacao_expoe_apenas_dados_publicos_da_declaracao(self):
+        """A resposta não deve expor nome, descrição ou outros dados internos."""
         resp = self.client.get(f"/api/validar/{self.declaracao.codigo}/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(list(resp.data.keys()), ["valido"])
+        self.assertEqual(
+            set(resp.data.keys()),
+            {"valido", "matricula", "data_atendimento", "horario_entrada", "horario_saida"},
+        )
 

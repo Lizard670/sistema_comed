@@ -122,11 +122,27 @@
                     .then(data => {
                         resultado.style.display = "block";
                         if (data.valido) {
+                            const dataAtendimento = data.data_atendimento
+                                ? new Date(`${data.data_atendimento}T00:00:00`).toLocaleDateString('pt-BR')
+                                : '—';
+                            const horarioEntrada = data.horario_entrada
+                                ? data.horario_entrada.slice(0, 5)
+                                : '—';
+                            const horarioSaida = data.horario_saida
+                                ? data.horario_saida.slice(0, 5)
+                                : '—';
                             resultado.innerHTML = `
                                 <div class="alert alert-success text-center" role="alert">
                                     <i class="fas fa-check-circle me-2"></i>
                                     <strong>Declaração válida!</strong><br>
                                     Este código corresponde a uma declaração legítima emitida pelo CoMed.
+                                    <hr>
+                                    <div class="row text-start small g-2">
+                                        <div class="col-md-3"><strong>Matrícula:</strong> ${data.matricula || '—'}</div>
+                                        <div class="col-md-3"><strong>Data:</strong> ${dataAtendimento}</div>
+                                        <div class="col-md-3"><strong>Entrada:</strong> ${horarioEntrada}</div>
+                                        <div class="col-md-3"><strong>Saída:</strong> ${horarioSaida}</div>
+                                    </div>
                                 </div>
                             `;
                         } else {
