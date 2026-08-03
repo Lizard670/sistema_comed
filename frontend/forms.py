@@ -126,9 +126,9 @@ class Relatorios(forms.Form):
                 Div('curso', css_class="col-xl-3"),
             css_class="row d-flex align-items-start justify-content-between"),
 
-            Div(
-                Div('agrupar', css_class="col-xl-3"),
-            css_class="row d-flex align-items-start"),
+            #Div(
+            #    Div('agrupar', css_class="col-xl-3"),
+            #css_class="row d-flex align-items-start"),
 
             Div(
                 Div('escrever_opcoes', css_class="col-xl-6"),
