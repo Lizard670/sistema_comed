@@ -10,8 +10,6 @@ from core.models import Prontuario, Declaracao, Usuario, Aluno
 
 @login_required
 def pagina_inicial(request):
-    print("-"*10)
-    print(request.user)
     return render(request, "index.html")
 
 def pagina_deslogar(request):
@@ -31,6 +29,12 @@ def pagina_estudantes(request):
         form = forms.Estudante()
 
     return render(request, "estudantes.html", {"form": form})
+
+@login_required
+def pagina_relatorios(request):
+    form = forms.Relatorios()
+    
+    return render(request, "relatorios.html", {"form": form})
 
 @login_required
 def pagina_prontuario(request, pk=0, err=""):

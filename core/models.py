@@ -52,6 +52,8 @@ class Turma(BaseModel):
     
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name="turmas", blank=False, null=False)
     
+    ano = models.PositiveSmallIntegerField(help_text="Ano da turma", blank=False, null=False)
+    
     class Meta(BaseModel.Meta):
         db_table = "turma"
         verbose_name = "Turma"

@@ -1,6 +1,6 @@
 from django import forms
-from core.models import Aluno, Turma, Prontuario
-from datetime import date
+from core.models import Aluno, Turma, Curso, Prontuario
+from datetime import date, timedelta
 
 
 from crispy_forms.helper import FormHelper
@@ -69,6 +69,73 @@ class Prontuario(forms.Form):
             Submit('salvar_prontuario', texto_botao_sucesso, css_class='btn-success'),
             Submit('salvar_declaracao', 'Salvar declaração', css_class=f"btn-success {classe_desativar}"),
             Button('declaracao', 'Gerar PDF', css_class=f"btn-secondary {classe_desativar}")
+        )
+
+
+
+class Relatorios(forms.Form):
+    data_inicio = forms.DateField(label="Inicio período", 
+                           initial=(date(date.today().year, 1, 1)).strftime("%Y-%m-%d"), 
+                           widget=forms.DateInput(attrs={'type': 'date'}),
+                           required=False)
+    data_fim = forms.DateField(label="Fim período", 
+                           initial=date(date.today().year, 12, 31).strftime("%Y-%m-%d"), 
+                           widget=forms.DateInput(attrs={'type': 'date'}),
+                           required=False)
+    
+    turma = forms.ModelChoiceField(label="Turma", 
+                                   queryset=Turma.objects.all(),
+                                   required=False)
+    
+    curso = forms.ModelMultipleChoiceField(label="Curso", 
+                                           queryset=Curso.objects.all(),
+                                           widget=forms.CheckboxSelectMultiple,
+                                           required=False)
+    
+    ano = forms.MultipleChoiceField(label="Ano", 
+                                    choices=((i, i) for i in range(1, 5)),
+                                    widget=forms.CheckboxSelectMultiple,
+                                    required=False)
+
+    agrupar = forms.ChoiceField(label="Agrupamento dos prontuários",
+                                widget=forms.RadioSelect,
+                                choices=[("nenhum", "Mostrar todos os prontuários"), 
+                                         ("aluno", "Por aluno"), 
+                                         ("turma", "Por turma"), 
+                                         ("dia", "Por dia"), 
+                                         ("mes", "Por mês")],
+                                initial="nenhum")
+    
+    escrever_opcoes = forms.BooleanField(label="Escrever as opções usadas no relatório", 
+                                         initial=True,
+                                         required=False)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.helper = FormHelper
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form-horizontal'
+
+        self.helper.layout = Layout(
+            Div(
+                Div('data_inicio', css_class="col-xl-2"),
+                Div('data_fim', css_class="col-xl-2"),
+                Div('turma', css_class="col-xl-1"),
+                Div('ano', css_class="col-xl-1"),
+                Div('curso', css_class="col-xl-3"),
+            css_class="row d-flex align-items-start justify-content-between"),
+
+            #Div(
+            #    Div('agrupar', css_class="col-xl-3"),
+            #css_class="row d-flex align-items-start"),
+
+            Div(
+                Div('escrever_opcoes', css_class="col-xl-6"),
+            css_class="row d-flex align-items-end"),
+
+            Reset('limpar', 'Limpar', css_class='btn-danger'),
+            Button('declaracao', 'Gerar relatório', css_class=f"btn-success")
         )
 
 
