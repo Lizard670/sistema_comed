@@ -69,7 +69,7 @@ class Command(BaseCommand):
             else:
                 curso = cursos[2]
             
-            t, _ = Turma.objects.get_or_create(nome=nome_turma, curso=curso)
+            t, _ = Turma.objects.get_or_create(nome=nome_turma, curso=curso, ano=nome_turma[-1:])
             turmas.append(t)
 
         # Criar Alunos
