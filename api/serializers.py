@@ -43,7 +43,7 @@ class CursoDetailSerializer(serializers.ModelSerializer):
 class TurmaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turma
-        fields = ["id", "nome", "curso"]
+        fields = ["id", "nome", "curso", "ano"]
 
 
 class TurmaDetailSerializer(serializers.ModelSerializer):
