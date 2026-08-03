@@ -391,8 +391,14 @@ function registrarEventosCursoTurma() {
         const idCursoExistente = campoCursoExistente.value;
         const nomeTurma = campoNovaTurma.value.trim();
 
-        if ((!nomeNovoCurso && !idCursoExistente) || !nomeTurma) {
-            msgErro.textContent = "Informe um curso e o nome da turma.";
+        if (!nomeNovoCurso && !nomeTurma) {
+            msgErro.textContent = "Informe um novo curso ou o nome da turma.";
+            msgErro.style.display = "block";
+            return;
+        }
+
+        if (nomeTurma && !nomeNovoCurso && !idCursoExistente) {
+            msgErro.textContent = "Selecione um curso existente ou informe um novo curso para cadastrar a turma.";
             msgErro.style.display = "block";
             return;
         }
@@ -402,17 +408,30 @@ function registrarEventosCursoTurma() {
             : Promise.resolve({ id: Number(idCursoExistente) });
 
         cursoPromise
-            .then(curso => requisicaoApi(urlApiTurmas, { nome: nomeTurma, curso: curso.id }))
-            .then(turma => {
-                cursos[turma.curso] = cursos[turma.curso] || { id: turma.curso, nome: nomeNovoCurso };
-                turmas[turma.id] = turma;
-                carregarTabelaAlunos();
-                const modalAlunoElemento = document.getElementById("modalAdicionarAluno");
-                modalAlunoElemento.dataset.turmaSelecionada = turma.id;
-                modal.addEventListener("hidden.bs.modal", () => {
-                    bootstrap.Modal.getOrCreateInstance(modalAlunoElemento).show();
-                }, { once: true });
-                bootstrap.Modal.getInstance(modal).hide();
+            .then(curso => {
+                if (!nomeTurma) {
+                    cursos[curso.id] = curso;
+                    carregarTabelaAlunos();
+                    const modalAlunoElemento = document.getElementById("modalAdicionarAluno");
+                    modal.addEventListener("hidden.bs.modal", () => {
+                        bootstrap.Modal.getOrCreateInstance(modalAlunoElemento).show();
+                    }, { once: true });
+                    bootstrap.Modal.getInstance(modal).hide();
+                    return;
+                }
+
+                return requisicaoApi(urlApiTurmas, { nome: nomeTurma, curso: curso.id })
+                    .then(turma => {
+                        cursos[turma.curso] = cursos[turma.curso] || { id: turma.curso, nome: nomeNovoCurso };
+                        turmas[turma.id] = turma;
+                        carregarTabelaAlunos();
+                        const modalAlunoElemento = document.getElementById("modalAdicionarAluno");
+                        modalAlunoElemento.dataset.turmaSelecionada = turma.id;
+                        modal.addEventListener("hidden.bs.modal", () => {
+                            bootstrap.Modal.getOrCreateInstance(modalAlunoElemento).show();
+                        }, { once: true });
+                        bootstrap.Modal.getInstance(modal).hide();
+                    });
             })
             .catch(erro => {
                 console.error("Erro ao salvar curso/turma:", erro);

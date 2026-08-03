@@ -404,11 +404,11 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header" style="background-color:#187D75; color:white;">
-                        <h5 class="modal-title" id="modalAdicionarCursoTurmaLabel">Adicionar curso/turma</h5>
+                        <h5 class="modal-title" id="modalAdicionarCursoTurmaLabel">Adicionar curso ou turma</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="text-muted small">Escolha um curso existente ou informe o nome de um novo curso.</p>
+                        <p class="text-muted small">Você pode cadastrar somente um novo curso ou uma turma vinculada a um curso.</p>
                         <div class="mb-3">
                             <label class="form-label" for="cursoExistente">Curso existente</label>
                             <select class="form-select" id="cursoExistente">
@@ -420,8 +420,8 @@
                             <input type="text" class="form-control" id="novoCurso" maxlength="30" placeholder="Preencha somente se for um novo curso">
                         </div>
                         <div>
-                            <label class="form-label" for="novaTurma">Turma <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="novaTurma" maxlength="5" placeholder="Ex.: INF1A">
+                            <label class="form-label" for="novaTurma">Turma</label>
+                            <input type="text" class="form-control" id="novaTurma" maxlength="5">
                         </div>
                         <p id="erroAdicionarCursoTurma" style="display:none;" class="text-danger mt-3"></p>
                     </div>
