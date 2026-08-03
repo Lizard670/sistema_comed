@@ -123,7 +123,7 @@ class Command(BaseCommand):
             except ValueError:
                 raise CommandError("Formato de nascimento inválido. Use AAAA-MM-DD.")
         else:
-            self.stdout.write("  Data de nascimento (AAAA-MM-DD, opcional):")
+            self.stdout.write("  Data de nascimento (AAAA-MM-DD):")
             nascimento = self._perguntar_data("  > ")
 
         superuser = options["superuser"]
