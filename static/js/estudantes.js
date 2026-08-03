@@ -645,11 +645,12 @@ document.addEventListener("DOMContentLoaded", () => {
     iniciarCalendario();
     carregarTabelaAlunos();
 
-    // O DataTable pode ordenar e paginar as linhas. Lemos o ID da linha que
-    // está realmente visível/clicada para carregar exatamente aquele aluno.
-    document.getElementById("corpoTabelaEstudantes").addEventListener("click", evento => {
+    // O DataTable recria o tbody ao ordenar, paginar e filtrar. Por isso, o
+    // clique é tratado na tabela, que permanece a mesma durante essas ações.
+    const tabelaEstudantes = document.getElementById("tabelaEstudantes");
+    tabelaEstudantes.addEventListener("click", evento => {
         const linha = evento.target.closest("tr[data-aluno-id]");
-        if (!linha) return;
+        if (!linha || !tabelaEstudantes.contains(linha)) return;
         selecionarAluno(Number(linha.dataset.alunoId), linha);
     });
 
